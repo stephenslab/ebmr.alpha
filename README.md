@@ -4,7 +4,7 @@ This is an in-development R pacakge for Empirical Bayes Multiple Regression.
 
 Install using
 ```
-devtools::install.github("stephenslab/ebmr_alpha")
+devtools::install_github("stephenslab/ebmr.alpha")
 ```
 
 The main function is `ebmr` but there 
