@@ -1,3 +1,19 @@
+# fit is a list with elements
+# Data elements:
+# XtX
+# Xty
+# X
+#
+# Parameter elements:
+# mu
+# Sigma (diagonal elements of Sigma)
+# wbar
+# residual_variance
+# g
+#
+# questions: should fit contain X or just fitted values Xmu?
+# or maybe fit should contain svd for X? X=udv
+
 ebmr.init = function(X,y){
   fit = list()
   fit$p = ncol(X)
@@ -11,7 +27,8 @@ ebmr.init = function(X,y){
   fit$residual_variance = sd(y)^2
   fit$wbar = rep(1,fit$p)
   fit$g = 1
-  fit$elbo = NULL
   fit$KLw = 0 # the KL from qW to prior g(W)
+  fit$elbo = elbo(fit)
+  class(fit) = "ebmr"
   return(fit)
 }

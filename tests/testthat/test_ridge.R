@@ -6,7 +6,7 @@ test_that("ridge regression results match simple em", {
   X = matrix(rnorm(n*p),ncol=p)
   btrue = rnorm(p)
   y = X %*% btrue + sd*rnorm(n)
-  fit.embr = ebmr(X,y,200)
+  fit.embr = ebmr(X,y,tol=1e-10)
   fit.em = ridge_em1(y,X,1,1,200)
   expect_equal(fit.embr$residual_variance,fit.em$s2, tol=1e-3)
   expect_equal(fit.embr$g,fit.em$sb2/fit.em$s2, tol=1e-3)

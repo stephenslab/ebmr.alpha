@@ -14,3 +14,4 @@ h2_func = function(fit){
 elbo = function(fit){
   return(c_func(fit) + h1_func(fit) + h2_func(fit) + fit$KLw)
 }
+

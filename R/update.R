@@ -1,19 +1,3 @@
-# fit is a list with elements
-# Data elements:
-# XtX
-# Xty
-# X
-#
-# Parameter elements:
-# mu
-# Sigma (diagonal elements of Sigma)
-# wbar
-# residual_variance
-# g
-#
-# questions: should fit contain X or just fitted values Xmu?
-# or maybe fit should contain svd for X? X=udv
-
 fitted.values = function(fit){
   fit$X %*% fit$mu
 }
