@@ -1,14 +1,16 @@
 ebmr.init = function(X,y){
-  p = ncol(X)
   fit = list()
+  fit$p = ncol(X)
+  fit$n = nrow(X)
   fit$X = X
   fit$y = y
   fit$Xty = t(X) %*% y
   fit$XtX = t(X) %*% X
-  fit$mu = rep(0,p)
-  fit$Sigma = rep(0,p)
+  fit$mu = rep(0,fit$p)
+  fit$Sigma = matrix(0,nrow=fit$p,ncol=fit$p)
   fit$residual_variance = sd(y)^2
-  fit$w = rep(1,p)
+  fit$wbar = rep(1,fit$p)
   fit$g = 1
+  fit$elbo = NULL
   return(fit)
 }
