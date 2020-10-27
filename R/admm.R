@@ -1,0 +1,29 @@
+# Note that allows for non-zero prior mean -- ridge regression is usually 0 prior mean
+ridge = function(y,A,prior_variance,prior_mean=rep(0,ncol(A)),residual_variance=1){
+  n = length(y)
+  p = ncol(A)
+  L = chol(t(A) %*% A + (residual_variance/prior_variance)*diag(p))
+  b = backsolve(L, t(A) %*% y + (residual_variance/prior_variance)*prior_mean, transpose=TRUE)
+  b = backsolve(L, b)
+  #b = chol2inv(L) %*% (t(A) %*% y + (residual_variance/prior_variance)*prior_mean)
+  return(b)
+}
+
+prox_regression = function(x, t, y, A, residual_variance=1){
+  ridge(y,A,prior_variance = t,prior_mean = x,residual_variance)
+}
+
+# I use lamba = 1/2w where w is a vector of prior variances
+prox_l2_het = function(x,t,lambda){
+  prior_prec = 2*lambda # prior precision
+  data_prec = 1/t
+  return(x * data_prec/(data_prec+prior_prec))
+}
+
+update.mu.admm = function(fit){
+  fit$mu = prox_regression(fit$z - fit$u, 1/fit$rho, fit$y, fit$X)
+  fit$z = prox_l2_het(fit$mu + fit$u, 1/fit$rho, 0.5/fit$w)
+  fit$u = fit$u + fit$mu - fit$z
+  return(fit)
+}
+

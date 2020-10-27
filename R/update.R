@@ -10,9 +10,13 @@ update.residual_variance = function(fit){
 
 #' @description update both mu and Sigma using direct approach with matrix inversion
 update.mu.and.Sigma.full = function(fit){
-  Sigma = chol2inv(chol(fit$XtX + diag(1/fit$wbar)))
-  fit$mu = Sigma %*% fit$Xty
-  fit$Sigma = Sigma # may only need diagonal elements ultimately but need full for the ELBO
+  fit = update.Sigma.full(fit)
+  fit$mu = fit$Sigma %*% fit$Xty
+  return(fit)
+}
+
+update.Sigma.full = function(fit){
+  fit$Sigma = chol2inv(chol(fit$XtX + diag(1/fit$wbar)))
   return(fit)
 }
 

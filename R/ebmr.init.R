@@ -29,6 +29,16 @@ ebmr.init = function(X,y){
   fit$g = 1
   fit$KLw = 0 # the KL from qW to prior g(W)
   fit$elbo = elbo(fit)
+
+  # for admm updates
+  fit$z = fit$mu
+  fit$u = fit$mu
+  fit$rho = 1 # may want to change this
+
   class(fit) = "ebmr"
   return(fit)
+}
+
+ebmr.init.admm = function(f){
+
 }
