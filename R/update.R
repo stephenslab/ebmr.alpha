@@ -38,6 +38,7 @@ update.w.and.g.ridge = function(fit){
   fit$g = mean(fit$mu^2 + fit$residual_variance * diag(fit$Sigma))/fit$residual_variance
   fit$wbar = rep(fit$g,fit$p)
   fit$Elogw = rep(log(fit$g),fit$p) # the expected log term for elbo computation
+  fit$KLw = 0 # the prior and posterior are the same for ridge
   return(fit)
 }
 

@@ -12,5 +12,6 @@ ebmr.init = function(X,y){
   fit$wbar = rep(1,fit$p)
   fit$g = 1
   fit$elbo = NULL
+  fit$KLw = 0 # the KL from qW to prior g(W)
   return(fit)
 }
