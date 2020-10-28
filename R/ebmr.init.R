@@ -23,7 +23,9 @@ ebmr.init = function(X,y){
   fit$Xty = t(X) %*% y
   fit$XtX = t(X) %*% X
   fit$mu = rep(0,fit$p)
-  fit$Sigma = matrix(0,nrow=fit$p,ncol=fit$p)
+  fit$Sigma_full = matrix(0,nrow=fit$p,ncol=fit$p) # for storing the full matrix; for testing only
+  fit$Sigma_diag = rep(0,fit$p) # for storing the diagonal of Sigma
+
   fit$residual_variance = sd(y)^2
   fit$wbar = rep(1,fit$p)
   fit$g = 1
@@ -41,6 +43,4 @@ ebmr.init = function(X,y){
   return(fit)
 }
 
-ebmr.init.admm = function(f){
 
-}

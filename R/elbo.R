@@ -8,7 +8,7 @@ h1_func = function(fit){
 }
 
 h2_func = function(fit){
-  -0.5*sum( (fit$XtX + diag(1/fit$wbar)) * fit$Sigma ) + 0.5* as.numeric(determinant(fit$Sigma,logarithm=TRUE)$modulus)
+  -0.5*sum( (fit$XtX + diag(1/fit$wbar)) * fit$Sigma ) + 0.5* as.numeric(determinant(fit$Sigma_full,logarithm=TRUE)$modulus)
 }
 
 elbo = function(fit){

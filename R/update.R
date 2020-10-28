@@ -11,7 +11,7 @@ update.residual_variance = function(fit){
 #' @description update both mu and Sigma using direct approach with matrix inversion
 update.mu.and.Sigma.direct = function(fit){
   fit = update.Sigma.direct(fit)
-  fit$mu = fit$Sigma %*% fit$Xty
+  fit$mu = fit$Sigma_full %*% fit$Xty
   return(fit)
 }
 
@@ -23,7 +23,9 @@ chol2logdet = function(L){
 
 update.Sigma.direct = function(fit){
   LL = chol(fit$XtX + diag(1/fit$wbar))
-  fit$Sigma = chol2inv(LL)
+  fit$Sigma_full = chol2inv(LL)
+  fit$Sigma_diag = diag(fit$Sigma_full)
+
   fit$h2_term =  -0.5*fit$p - 0.5 * chol2logdet(LL) # log-determinant from cholesky
   return(fit)
 }
@@ -35,7 +37,8 @@ update.Sigma.woodbury = function(fit){
   H.chol = chol(H)
 
   H.inv = chol2inv(H.chol)
-  fit$Sigma = diag(fit$wbar^0.5) %*% (diag(fit$p) - t(Xtilde) %*% H.inv %*% Xtilde) %*% diag(fit$wbar^0.5)
+  fit$Sigma_full = diag(fit$wbar^0.5) %*% (diag(fit$p) - t(Xtilde) %*% H.inv %*% Xtilde) %*% diag(fit$wbar^0.5)
+  fit$Sigma_diag = diag(fit$Sigma_full)
 
   fit$h2_term =  -0.5*fit$p + 0.5* sum(log(fit$wbar)) - 0.5 * chol2logdet(H.chol) # log-determinant from cholesky
   return(fit)
@@ -44,7 +47,7 @@ update.Sigma.woodbury = function(fit){
 
 #' @description update w and g in case where g is a point mass ("ridge regression)
 update.w.and.g.ridge = function(fit){
-  fit$g = mean(fit$mu^2 + fit$residual_variance * diag(fit$Sigma))/fit$residual_variance
+  fit$g = mean(fit$mu^2 + fit$residual_variance * fit$Sigma_diag)/fit$residual_variance
   wbar_new = rep(fit$g,fit$p)
   fit = update.wbar(fit,wbar_new)
   fit$Elogw = rep(log(fit$g),fit$p) # the expected log term for elbo computation
@@ -56,7 +59,7 @@ update.w.and.g.ridge = function(fit){
 # this function deals with the fact you need to update h2_term when updating wbar
 # because the 0.5 tr(W^{-1} Sigma) term changes
 update.wbar = function(fit,wbar_new){
-  fit$h2_term = fit$h2_term + 0.5 * sum( ((1/fit$wbar)-(1/wbar_new)) * diag(fit$Sigma))
+  fit$h2_term = fit$h2_term + 0.5 * sum( ((1/fit$wbar)-(1/wbar_new)) * fit$Sigma_diag)
   fit$wbar = wbar_new
   return(fit)
 }
@@ -66,13 +69,13 @@ update.elbo = function(fit){
   return(fit)
 }
 
-Sigma_diag = function(w, X){
-  Xtilde = X %*% diag(w^0.5)
-  n = nrow(X)
-  H = diag(n) + Xtilde %*% t(Xtilde)
-  Hinv = chol2inv(chol(H))
-  w * (1- colSums(Xtilde * Hinv %*% Xtilde))
-}
+# Sigma_diag = function(w, X){
+#   Xtilde = X %*% diag(w^0.5)
+#   n = nrow(X)
+#   H = diag(n) + Xtilde %*% t(Xtilde)
+#   Hinv = chol2inv(chol(H))
+#   w * (1- colSums(Xtilde * Hinv %*% Xtilde))
+# }
 
 
 # Sigma_full = chol2inv(chol(fit$XtX + diag(1/fit$wbar)))
