@@ -10,7 +10,7 @@ ebmr = function(X, y, tol=1e-10, admm = TRUE, maxiter = 1000){
   for(i in 1:maxiter){
     if(admm){
       fit = update.mu.admm(fit)
-      fit = update.Sigma.direct(fit)
+      fit = update.Sigma.woodbury(fit)
     } else {
       fit = update.mu.and.Sigma.direct(fit)
     }

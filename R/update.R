@@ -35,7 +35,7 @@ update.Sigma.direct = function(fit){
 # where L is the first k right-singular vectors of X
 # if k=NULL uses all of the svd computed at initialization
 # which is "exact" if this is the full svd
-update.Sigma.woodbury = function(fit,k=NULL){
+update.Sigma.woodbury = function(fit,k=NULL, compute_Sigma_full = FALSE){
 
   if(is.null(k)){k = length(fit$X.svd$d)} # use all the elements of svd
 
@@ -48,10 +48,13 @@ update.Sigma.woodbury = function(fit,k=NULL){
 
   H = diag(nrow(Ltilde)) + Ltilde %*% t(Ltilde)
   H.chol = chol(H)
-
   H.inv = chol2inv(H.chol)
-  fit$Sigma_full = diag(ww^0.5) %*% (diag(fit$p) - t(Ltilde) %*% H.inv %*% Ltilde) %*% diag(ww^0.5)
-  fit$Sigma_diag = diag(fit$Sigma_full)
+
+  # only necessary for testing
+  if(compute_Sigma_full)
+    fit$Sigma_full = diag(ww^0.5) %*% (diag(fit$p) - t(Ltilde) %*% H.inv %*% Ltilde) %*% diag(ww^0.5)
+
+  fit$Sigma_diag = ww * (1- colSums(Ltilde * H.inv %*% Ltilde))
 
   fit$h2_term =  -0.5*fit$p + 0.5* sum(log(ww)) - 0.5 * chol2logdet(H.chol) # log-determinant from cholesky
   return(fit)
