@@ -13,15 +13,16 @@ prox_regression = function(x, t, y, A, residual_variance=1){
   ridge(y,A,prior_variance = t,prior_mean = x,residual_variance)
 }
 
-# Note that allows for non-zero prior mean -- ridge regression is usually 0 prior mean
+# this is version of ridge above that takes SVD of A instead of A
+# this effectively allows (A'A + kI)^{-1} to be computed efficiently for any k
 ridge_svd = function(y,A.svd,prior_variance,prior_mean=rep(0,nrow(A.svd$v)),residual_variance=1){
   n = length(y)
   p = nrow(A.svd$v)
-  L = chol(A.svd$v %*% diag(A.svd$d^2) %*% t(A.svd$v) + (residual_variance/prior_variance)*diag(p))
-  b = backsolve(L, A.svd$v %*% (diag(A.svd$d) %*% (t(A.svd$u) %*% y)) + (residual_variance/prior_variance)*prior_mean, transpose=TRUE)
-  b = backsolve(L, b)
-  #b = chol2inv(L) %*% (t(A) %*% y + (residual_variance/prior_variance)*prior_mean)
-  return(b)
+  bnew = (A.svd$v %*% (diag(A.svd$d) %*% (t(A.svd$u) %*% y)) + (residual_variance/prior_variance)*prior_mean)
+  bnew = t(A.svd$v) %*% bnew
+  bnew = diag((A.svd$d^2 + (residual_variance/prior_variance))^-1) %*% bnew
+  bnew = A.svd$v %*%  bnew
+  return(bnew)
 }
 
 prox_regression_svd = function(x, t, y, A.svd, residual_variance=1){
