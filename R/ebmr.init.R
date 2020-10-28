@@ -1,6 +1,5 @@
 # fit is a list with elements
 # Data elements:
-# XtX
 # Xty
 # X.svd the svd of X
 # X
@@ -22,21 +21,21 @@ ebmr.init = function(X,y){
   fit$X = X
   fit$y = y
   fit$Xty = t(X) %*% y
-  fit$XtX = t(X) %*% X
+  fit$X.svd = svd(X)
   fit$d = colSums(X^2)
 
   fit$mu = rep(0,fit$p)
   fit$Sigma_full = matrix(0,nrow=fit$p,ncol=fit$p) # for storing the full matrix; for testing only
   fit$Sigma_diag = rep(0,fit$p) # for storing the diagonal of Sigma
 
-  fit$X.svd = svd(X)
+
 
   fit$residual_variance = sd(y)^2
   fit$wbar = rep(1,fit$p)
   fit$g = 1
   fit$KLw = 0 # the KL from qW to prior g(W)
 
-  fit$h2_term = h2_func(fit)
+  fit$h2_term = -Inf # because Sigma is initialized at 0
   fit$elbo = elbo(fit)
 
   # for admm updates

@@ -22,7 +22,8 @@ chol2logdet = function(L){
 
 
 update.Sigma.direct = function(fit){
-  LL = chol(fit$XtX + diag(1/fit$wbar))
+  XtX = svd2XtX(fit$X.svd)
+  LL = chol(XtX + diag(1/fit$wbar))
   fit$Sigma_full = chol2inv(LL)
   fit$Sigma_diag = diag(fit$Sigma_full)
 
@@ -35,7 +36,7 @@ update.Sigma.direct = function(fit){
 # where L is the first k right-singular vectors of X
 # if k=NULL uses all of the svd computed at initialization
 # which is "exact" if this is the full svd
-update.Sigma.woodbury = function(fit,k=NULL, compute_Sigma_full = FALSE){
+update.Sigma.woodbury = function(fit, k=NULL, compute_Sigma_full = FALSE){
 
   if(is.null(k)){k = length(fit$X.svd$d)} # use all the elements of svd
 
@@ -94,8 +95,4 @@ update.elbo = function(fit){
 # }
 
 
-# Sigma_full = chol2inv(chol(fit$XtX + diag(1/fit$wbar)))
-
-
-# diag(Sigma_full) - Sigma_diag(fit$wbar,fit$X)
 

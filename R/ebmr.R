@@ -5,12 +5,17 @@
 #' @param tol small real number controlling convergence tolerance; algorithm stops when elbo changes less than tol
 #' @param maxiter integer indicating maximum number of iterations
 #' @return an object of class "ebmr" that contains fit details
-ebmr = function(X, y, tol=1e-10, admm = TRUE, maxiter = 1000){
+ebmr = function(X, y, tol=1e-10, admm = TRUE, maxiter = 1000, k=NULL){
   fit = ebmr.init(X,y)
+  if(!is.null(k)){
+    if(!admm){
+      stop("k option currently only valid when admm=TRUE")
+    }
+  }
   for(i in 1:maxiter){
     if(admm){
       fit = update.mu.admm(fit)
-      fit = update.Sigma.woodbury(fit)
+      fit = update.Sigma.woodbury(fit, k=k)
     } else {
       fit = update.mu.and.Sigma.direct(fit)
     }
