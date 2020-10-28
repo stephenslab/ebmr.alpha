@@ -58,6 +58,8 @@ update.Sigma.woodbury = function(fit, k=NULL, compute_Sigma_full = FALSE){
   fit$Sigma_diag = ww * (1- colSums(Ltilde * H.inv %*% Ltilde))
 
   fit$h2_term =  -0.5*fit$p + 0.5* sum(log(ww)) - 0.5 * chol2logdet(H.chol) # log-determinant from cholesky
+
+
   return(fit)
 }
 
