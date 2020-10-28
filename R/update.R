@@ -9,8 +9,8 @@ update.residual_variance = function(fit){
 }
 
 #' @description update both mu and Sigma using direct approach with matrix inversion
-update.mu.and.Sigma.full = function(fit){
-  fit = update.Sigma.full(fit)
+update.mu.and.Sigma.direct = function(fit){
+  fit = update.Sigma.direct(fit)
   fit$mu = fit$Sigma %*% fit$Xty
   return(fit)
 }
@@ -21,10 +21,23 @@ chol2logdet = function(L){
 }
 
 
-update.Sigma.full = function(fit){
+update.Sigma.direct = function(fit){
   LL = chol(fit$XtX + diag(1/fit$wbar))
   fit$Sigma = chol2inv(LL)
   fit$h2_term =  -0.5*fit$p - 0.5 * chol2logdet(LL) # log-determinant from cholesky
+  return(fit)
+}
+
+# update Sigma using the woodbury formula
+update.Sigma.woodbury = function(fit){
+  Xtilde = fit$X %*% diag(fit$wbar^0.5)
+  H = diag(fit$n) + Xtilde %*% t(Xtilde)
+  H.chol = chol(H)
+
+  H.inv = chol2inv(H.chol)
+  fit$Sigma = diag(fit$wbar^0.5) %*% (diag(fit$p) - t(Xtilde) %*% H.inv %*% Xtilde) %*% diag(fit$wbar^0.5)
+
+  fit$h2_term =  -0.5*fit$p + 0.5* sum(log(fit$wbar)) - 0.5 * chol2logdet(H.chol) # log-determinant from cholesky
   return(fit)
 }
 
@@ -60,6 +73,7 @@ Sigma_diag = function(w, X){
   Hinv = chol2inv(chol(H))
   w * (1- colSums(Xtilde * Hinv %*% Xtilde))
 }
+
 
 # Sigma_full = chol2inv(chol(fit$XtX + diag(1/fit$wbar)))
 
