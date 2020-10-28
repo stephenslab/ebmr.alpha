@@ -28,6 +28,8 @@ ebmr.init = function(X,y){
   fit$wbar = rep(1,fit$p)
   fit$g = 1
   fit$KLw = 0 # the KL from qW to prior g(W)
+
+  fit$h2_term = h2_func(fit)
   fit$elbo = elbo(fit)
 
   # for admm updates
