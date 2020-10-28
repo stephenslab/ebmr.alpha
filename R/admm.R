@@ -20,8 +20,9 @@ ridge_svd = function(y,A.svd,prior_variance,prior_mean=rep(0,nrow(A.svd$v)),resi
   p = nrow(A.svd$v)
   #bnew = (A.svd$v %*% (diag(A.svd$d) %*% (t(A.svd$u) %*% y)) + (residual_variance/prior_variance)*prior_mean)
   #bnew = t(A.svd$v) %*% bnew
-  bnew = diag(A.svd$d) %*% (t(A.svd$u) %*% y) + t(A.svd$v) %*% ((residual_variance/prior_variance)*prior_mean)
-  bnew = diag((A.svd$d^2 + (residual_variance/prior_variance))^-1) %*% bnew
+  bnew = A.svd$d * crossprod(A.svd$u,y)
+  bnew = bnew + crossprod(A.svd$v, prior_mean) * (residual_variance/prior_variance)
+  bnew = ((A.svd$d^2 + (residual_variance/prior_variance))^-1) * bnew
   bnew = A.svd$v %*%  bnew
   return(bnew)
 }
