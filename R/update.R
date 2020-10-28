@@ -31,16 +31,29 @@ update.Sigma.direct = function(fit){
 }
 
 # update Sigma using the woodbury formula
-update.Sigma.woodbury = function(fit){
-  Xtilde = fit$X %*% diag(fit$wbar^0.5)
-  H = diag(fit$n) + Xtilde %*% t(Xtilde)
+# uses the approximation format X'X approximately L'L+D
+# where L is the first k right-singular vectors of X
+# if k=NULL uses all of the svd computed at initialization
+# which is "exact" if this is the full svd
+update.Sigma.woodbury = function(fit,k=NULL){
+
+  if(is.null(k)){k = length(fit$X.svd$d)} # use all the elements of svd
+
+  # Compute the L and D from the (truncated) svd of X
+  L = diag(fit$X.svd$d[1:k]) %*% t(fit$X.svd$v[,1:k])
+  D = fit$d - colSums(L^2) # this should be 0 for full SVD... but for future expansion
+
+  ww = 1/(1/fit$wbar + D) # effective weights
+  Ltilde = L %*% diag(ww^0.5) # scaled version of L
+
+  H = diag(nrow(Ltilde)) + Ltilde %*% t(Ltilde)
   H.chol = chol(H)
 
   H.inv = chol2inv(H.chol)
-  fit$Sigma_full = diag(fit$wbar^0.5) %*% (diag(fit$p) - t(Xtilde) %*% H.inv %*% Xtilde) %*% diag(fit$wbar^0.5)
+  fit$Sigma_full = diag(ww^0.5) %*% (diag(fit$p) - t(Ltilde) %*% H.inv %*% Ltilde) %*% diag(ww^0.5)
   fit$Sigma_diag = diag(fit$Sigma_full)
 
-  fit$h2_term =  -0.5*fit$p + 0.5* sum(log(fit$wbar)) - 0.5 * chol2logdet(H.chol) # log-determinant from cholesky
+  fit$h2_term =  -0.5*fit$p + 0.5* sum(log(ww)) - 0.5 * chol2logdet(H.chol) # log-determinant from cholesky
   return(fit)
 }
 
