@@ -40,11 +40,11 @@ update.Sigma.woodbury = function(fit,k=NULL, compute_Sigma_full = FALSE){
   if(is.null(k)){k = length(fit$X.svd$d)} # use all the elements of svd
 
   # Compute the L and D from the (truncated) svd of X
-  L = diag(fit$X.svd$d[1:k]) %*% t(fit$X.svd$v[,1:k])
+  L = fit$X.svd$d[1:k] * t(fit$X.svd$v[,1:k])
   D = fit$d - colSums(L^2) # this should be 0 for full SVD... but for future expansion
 
   ww = 1/(1/fit$wbar + D) # effective weights
-  Ltilde = L %*% diag(ww^0.5) # scaled version of L
+  Ltilde = t(t(L) * ww^0.5) # scale columns of L by ww^0.5
 
   H = diag(nrow(Ltilde)) + Ltilde %*% t(Ltilde)
   H.chol = chol(H)
