@@ -1,4 +1,4 @@
-test_that("woodbury update matches direct update", {
+test_that("woodbury update matches direct update",{
   set.seed(100)
   sd = 10
   n = 20
