@@ -3,7 +3,14 @@
 #' other computations (EM algorithm to maximize sb2; s2, and posterior computations)
 #' are cheap
 #'
-update.grr.svd = function(fit, tol, maxiter){
+#' @param fit a ebmr fit
+#'
+#' @param tol a tolerance for the EM algorithm
+#'
+#' @param maxiter maximum number of iterations for EM algorithm
+#'
+#' @return an ebmr fit
+update.grr.svd = function(fit, tol = 1e-3, maxiter = 1000){
 
   # svd computation
   Xtilde = t(fit$wbar^0.5 * t(fit$X))
