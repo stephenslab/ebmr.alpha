@@ -1,7 +1,7 @@
 Encoding: UTF-8
 Type: Package
 Package: ebmr.alpha
-Version: 0.1.1
+Version: 0.1.2
 Date: 2020-10-29
 Title: Empirical Bayes Multiple Regression
 Authors@R: c(person("Matthew","Stephens",role=c("aut","cre"),
@@ -13,6 +13,7 @@ Description: Implements scalable empirical Bayes methods for multiple
 License: MIT + file LICENSE
 URL: https://github.com/stephenslab/ebmr.alpha
 BugReports: https://github.com/stephenslab/ebmr.alpha/issues
+Imports: mvtnorm
 Suggests: testthat
 LazyData: true
 NeedsCompilation: no

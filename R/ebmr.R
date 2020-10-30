@@ -1,40 +1,40 @@
-#' @title Fits Empirical Bayes multiple regression model
+#' @title Fit Empirical Bayes Multiple Regression Model
 #' 
 #' @description This is a new approach based on generalized ridge
-#' regression
+#'   regression.
 #' 
-#' @param X an n times p numeric matrix of covariates
+#' @param X An n times p numeric matrix of covariates.
 #' 
-#' @param y an n vector of responses
+#' @param y An n vector of responses.
 #' 
-#' @param tol small real number controlling convergence tolerance;
-#'   algorithm stops when elbo changes less than tol
+#' @param tol Small real number controlling convergence tolerance;
+#'   algorithm stops when elbo changes less than \code{tol}.
 #' 
-#' @param maxiter integer indicating maximum number of iterations
+#' @param maxiter Integer indicating maximum number of iterations.
 #' 
-#' @param k integer indicating the rank of approximation to use for
-#' Sigma update (default of NULL uses full rank)
+#' @param k Integer indicating the rank of the approximation to use
+#'   for Sigma update (default \code{NULL} uses full rank)
 #' 
-#' @param thin integer indicating how often to update Sigma (eg
-#'   thin=10 means every 10 iterations).
+#' @param thin Integer indicating how often to update Sigma (e.g.,
+#'   \code{thin = 10} means update every 10 iterations).
 #' 
-#' @return an object of class "ebmr" that contains fit details.
+#' @return An object of class "ebmr" that contains fit details.
 #'
 #' @export
 #' 
-ebmr = function (X, y, tol=1e-10, admm = TRUE, maxiter = 1000, k = NULL,
-                 thin = 1){
+ebmr = function (X, y, tol = 1e-10, admm = TRUE, maxiter = 1000,
+                 k = NULL, thin = 1){
   fit = ebmr.init(X,y)
   if(!is.null(k)){
     if(!admm){
-      stop("k option currently only valid when admm=TRUE")
+      stop("k option currently only valid when admm = TRUE")
     }
   }
   for(i in 1:maxiter){
     if(admm){
       fit = update.mu.admm(fit)
 
-      # update Sigma only every thin iterations
+      # Update Sigma only every "thin" iterations.
       if((i-1) %% thin == 0){ 
         fit = update.Sigma.woodbury(fit,k = k)
       }
@@ -45,8 +45,8 @@ ebmr = function (X, y, tol=1e-10, admm = TRUE, maxiter = 1000, k = NULL,
     fit = update.residual_variance(fit)
     fit = update.w.and.g.ridge(fit)
     fit = update.elbo(fit)
-    if(ebmr_get_elbodiff(fit) < tol) break
+    if(ebmr_get_elbodiff(fit) < tol)
+      break
   }
   return(fit)
 }
-

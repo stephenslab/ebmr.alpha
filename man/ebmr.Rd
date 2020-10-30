@@ -2,30 +2,30 @@
 % Please edit documentation in R/ebmr.R
 \name{ebmr}
 \alias{ebmr}
-\title{Fits Empirical Bayes multiple regression model}
+\title{Fit Empirical Bayes Multiple Regression Model}
 \usage{
 ebmr(X, y, tol = 1e-10, admm = TRUE, maxiter = 1000, k = NULL, thin = 1)
 }
 \arguments{
-\item{X}{an n times p numeric matrix of covariates}
+\item{X}{An n times p numeric matrix of covariates.}
 
-\item{y}{an n vector of responses}
+\item{y}{An n vector of responses.}
 
-\item{tol}{small real number controlling convergence tolerance;
-algorithm stops when elbo changes less than tol}
+\item{tol}{Small real number controlling convergence tolerance;
+algorithm stops when elbo changes less than \code{tol}.}
 
-\item{maxiter}{integer indicating maximum number of iterations}
+\item{maxiter}{Integer indicating maximum number of iterations.}
 
-\item{k}{integer indicating the rank of approximation to use for
-Sigma update (default of NULL uses full rank)}
+\item{k}{Integer indicating the rank of the approximation to use
+for Sigma update (default \code{NULL} uses full rank)}
 
-\item{thin}{integer indicating how often to update Sigma (eg
-thin=10 means every 10 iterations).}
+\item{thin}{Integer indicating how often to update Sigma (e.g.,
+\code{thin = 10} means update every 10 iterations).}
 }
 \value{
-an object of class "ebmr" that contains fit details.
+An object of class "ebmr" that contains fit details.
 }
 \description{
 This is a new approach based on generalized ridge
-regression
+  regression.
 }
