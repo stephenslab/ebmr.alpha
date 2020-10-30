@@ -1,9 +1,9 @@
 ebmr.update.Sigma = function(fit, method = c("woodbury","direct"), k = NULL, compute_Sigma_full = FALSE){
   method = match.arg(method)
   if(method == "direct")
-    fit = update.Sigma.direct(fit)
+    fit = ebmr.update.Sigma.direct(fit)
   else if(method == "woodbury"){
-    fit = update.Sigma.woodbury(fit, k, compute_Sigma_full)
+    fit = ebmr.update.Sigma.woodbury(fit, k, compute_Sigma_full)
   } else {
     stop("invalid method")
   }
@@ -47,7 +47,6 @@ ebmr.update.Sigma.woodbury = function(fit, k = NULL, compute_Sigma_full = FALSE)
 
   fit$Sigma_diag = ww * (1 - colSums(Ltilde * H.inv %*% Ltilde))
 
-  # log-determinant from Cholesky.
   fit$h2_term = -0.5*fit$p + 0.5*sum(log(ww)) - 0.5*chol2logdet(H.chol)
 
   return(fit)

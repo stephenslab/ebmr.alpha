@@ -12,7 +12,7 @@
 #' @param compute_sigma_full set to true to compute full Sigma matrix for testing purposes
 #'
 #' @return an ebmr fit
-ebmr.update.grr = function(fit, tol = 1e-3, maxiter = 1000, compute_sigma_full=FALSE){
+ebmr.update.grr = function(fit, tol = 1e-3, maxiter = 1000, compute_Sigma_full=FALSE){
 
   # svd computation
   Xtilde = t(fit$wbar^0.5 * t(fit$X))
@@ -27,7 +27,7 @@ ebmr.update.grr = function(fit, tol = 1e-3, maxiter = 1000, compute_sigma_full=F
 
   fit$Sigma_diag = Sigma1_diag_woodbury_svd(fit$wbar,Xtilde.svd,fit$sb2)
 
-  if(compute_sigma_full){
+  if(compute_Sigma_full){
     fit$Sigma_full = Sigma1_woodbury_svd(fit$wbar,Xtilde.svd,fit$sb2)
   }
 
