@@ -1,4 +1,4 @@
-test("elbo")
+context("elbo")
 
 test_that("elbo is increasing with k option", {
   set.seed(100)

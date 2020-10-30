@@ -13,6 +13,8 @@
 #
 # questions: should fit contain X or just fitted values Xmu?
 # or maybe fit should contain svd for X? X=udv
+#
+#' @importFrom stats sd
 ebmr.init = function(X,y){
   fit = list()
   fit$p = ncol(X)

@@ -2,3 +2,4 @@
 
 export(ebmr)
 importFrom(mvtnorm,dmvnorm)
+importFrom(stats,sd)

@@ -14,6 +14,9 @@ ebmr(X, y, tol = 1e-10, admm = TRUE, maxiter = 1000, k = NULL, thin = 1)
 \item{tol}{Small real number controlling convergence tolerance;
 algorithm stops when elbo changes less than \code{tol}.}
 
+\item{admm}{If \code{admm = TRUE}, use the ADMM updates for
+updating the regression coefficients.}
+
 \item{maxiter}{Integer indicating maximum number of iterations.}
 
 \item{k}{Integer indicating the rank of the approximation to use

@@ -9,6 +9,9 @@
 #' 
 #' @param tol Small real number controlling convergence tolerance;
 #'   algorithm stops when elbo changes less than \code{tol}.
+#'
+#' @param admm If \code{admm = TRUE}, use the ADMM updates for
+#'   updating the regression coefficients.
 #' 
 #' @param maxiter Integer indicating maximum number of iterations.
 #' 

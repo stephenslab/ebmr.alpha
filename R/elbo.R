@@ -12,7 +12,7 @@ h1_func = function(fit){
 
 # This function is not directly used in the algorithm - only for testing.
 h2_func = function(fit){
-  XtX = svd2XtX(X.svd)
+  XtX = svd2XtX(fit$X.svd)
   return(with(fit,
          -0.5*sum((XtX + diag(1/wbar)) * Sigma_full) + 0.5*logdet(Sigma_full)))
 }
