@@ -32,6 +32,8 @@ ebmr.init = function(X,y){
 
   fit$residual_variance = sd(y)^2
   fit$wbar = rep(1,fit$p)
+  fit$sb2 = 1
+
   fit$g = 1
   fit$KLw = 0 # the KL from qW to prior g(W)
 
