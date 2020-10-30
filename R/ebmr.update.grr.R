@@ -9,8 +9,10 @@
 #'
 #' @param maxiter maximum number of iterations for EM algorithm
 #'
+#' @param compute_sigma_full set to true to compute full Sigma matrix for testing purposes
+#'
 #' @return an ebmr fit
-update.grr.svd = function(fit, tol = 1e-3, maxiter = 1000){
+ebmr.update.grr = function(fit, tol = 1e-3, maxiter = 1000, compute_sigma_full=FALSE){
 
   # svd computation
   Xtilde = t(fit$wbar^0.5 * t(fit$X))
@@ -24,7 +26,15 @@ update.grr.svd = function(fit, tol = 1e-3, maxiter = 1000){
   fit$sb2 = yt.em3$sb2
 
   fit$Sigma_diag = Sigma1_diag_woodbury_svd(fit$wbar,Xtilde.svd,fit$sb2)
+
+  if(compute_sigma_full){
+    fit$Sigma_full = Sigma1_woodbury_svd(fit$wbar,Xtilde.svd,fit$sb2)
+  }
+
   fit$mu = mu1_woodbury_svd(fit$y, fit$wbar, Xtilde.svd, fit$sb2)
+
+  fit$h2_term = -0.5*fit$p + 0.5*sum(log(fit$sb2*fit$wbar)) - 0.5*sum(log(1+fit$sb2*Xtilde.svd$d^2))
+
   return(fit)
 }
 

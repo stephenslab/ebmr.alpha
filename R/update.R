@@ -4,15 +4,15 @@ fitted.values = function(fit){
 
 # Update residual variance by maximizing ELBO given all other
 # parameters.
-update.residual_variance = function(fit){
+ebmr.update.residual_variance = function(fit){
   fit$residual_variance = with(fit,
-    (1/n)*(sum((y - fitted.values(fit))^2) + sum(mu^2/wbar)))
+    (1/n)*(sum((y - fitted.values(fit))^2) + sum(mu^2/(sb2*wbar))))
   return(fit)
 }
 
 # Update both mu and Sigma using direct approach with matrix inversion.
-update.mu.and.Sigma.direct = function(fit){
-  fit = update.Sigma.direct(fit)
+ebmr.update.mu.and.Sigma.direct = function(fit){
+  fit = ebmr.update.Sigma.direct(fit)
   fit$mu = with(fit,drop(Sigma_full %*% Xty))
   return(fit)
 }
@@ -22,9 +22,9 @@ chol2logdet = function(L){
   sum(log(diag(L)^2))
 }
 
-update.Sigma.direct = function(fit){
+ebmr.update.Sigma.direct = function(fit){
   XtX = svd2XtX(fit$X.svd)
-  LL = chol(XtX + diag(1/fit$wbar))
+  LL = chol(XtX + diag(1/(fit$sb2*fit$wbar)))
   fit$Sigma_full = chol2inv(LL)
   fit$Sigma_diag = diag(fit$Sigma_full)
   fit$h2_term = -0.5*fit$p - 0.5*chol2logdet(LL) # log-determinant from cholesky
@@ -36,17 +36,17 @@ update.Sigma.direct = function(fit){
 # where L is the first k right-singular vectors of X.
 # If k = NULL, uses all of the svd computed at initialization,
 # which is "exact" if this is the full svd.
-update.Sigma.woodbury = function(fit, k = NULL, compute_Sigma_full = FALSE){
+ebmr.update.Sigma.woodbury = function(fit, k = NULL, compute_Sigma_full = FALSE){
 
   if(is.null(k)){
     k = length(fit$X.svd$d) # Use all the elements of svd.
-  } 
+  }
 
   # Compute the L and D from the (truncated) svd of X.
   L = with(fit$X.svd,d[1:k] * t(v[,1:k]))
   D = fit$d - colSums(L^2) # This should be zero for full SVD... but for future expansion
 
-  ww = 1/(1/fit$wbar + D) # effective weights
+  ww = 1/(1/(fit$sb2*fit$wbar) + D) # effective weights
   Ltilde = t(t(L) * sqrt(ww)) # scale columns of L by sqrt(ww)
 
   H = diag(nrow(Ltilde)) + tcrossprod(Ltilde)
@@ -61,13 +61,13 @@ update.Sigma.woodbury = function(fit, k = NULL, compute_Sigma_full = FALSE){
   fit$Sigma_diag = ww * (1 - colSums(Ltilde * H.inv %*% Ltilde))
 
   # log-determinant from Cholesky.
-  fit$h2_term = -0.5*fit$p + 0.5*sum(log(ww)) - 0.5*chol2logdet(H.chol) 
+  fit$h2_term = -0.5*fit$p + 0.5*sum(log(ww)) - 0.5*chol2logdet(H.chol)
 
   return(fit)
 }
 
 # Update w and g in case where g is a point mass ("ridge regression").
-update.w.and.g.ridge = function(fit){
+ebmr.update.ebnv.ridge = function(fit){
   fit$g = with(fit,mean(mu^2 + residual_variance*Sigma_diag)/residual_variance)
   wbar_new = rep(fit$g,fit$p)
   fit = update.wbar(fit,wbar_new)
@@ -80,12 +80,12 @@ update.w.and.g.ridge = function(fit){
 # updating wbar because the 0.5 tr(W^{-1} Sigma) term changes
 update.wbar = function(fit, wbar_new){
   fit$h2_term = with(fit,
-    h2_term + 0.5*sum(((1/wbar) - (1/wbar_new))*Sigma_diag))
+    h2_term + 0.5* (1/sb2) * sum(((1/wbar) - (1/wbar_new))*Sigma_diag))
   fit$wbar = wbar_new
   return(fit)
 }
 
-update.elbo = function(fit){
+ebmr.update.elbo = function(fit){
   fit$elbo = c(fit$elbo,elbo(fit))
   return(fit)
 }

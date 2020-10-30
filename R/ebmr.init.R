@@ -15,7 +15,7 @@
 # or maybe fit should contain svd for X? X=udv
 #
 #' @importFrom stats sd
-ebmr.init = function(X,y){
+ebmr.init = function(X,y,sb2=1){
   fit = list()
   fit$p = ncol(X)
   fit$n = nrow(X)
@@ -31,12 +31,12 @@ ebmr.init = function(X,y){
 
   fit$residual_variance = sd(y)^2
   fit$wbar = rep(1,fit$p)
-  fit$sb2 = 1
+  fit$sb2 = sb2
 
   fit$g = 1
   fit$KLw = 0 # the KL from qW to prior g(W)
   fit$Elogw = 0
-  
+
   fit$h2_term = -Inf # because Sigma is initialized at 0
   fit$elbo = elbo(fit)
 

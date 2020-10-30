@@ -27,7 +27,7 @@
 ebrr_svd = function(X, y, tol=1e-10, maxiter = 1000){
   fit = ebmr.init(X,y)
 
-  fit = update.grr.svd(fit, tol, maxiter) # update all of mu, Sigma, residual variance and scaling of w
+  fit = ebmr.update.grr(fit, tol, maxiter) # update all of mu, Sigma, residual variance and scaling of w
 
   return(fit)
 }
