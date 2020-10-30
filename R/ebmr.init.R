@@ -34,9 +34,9 @@ ebmr.init = function(X,y,sb2=1){
   fit$sb2 = sb2
 
   # initialize to simple ridge case
-  fit$g = 1
+  fit$g = list(mixprop = c(1), w= c(1))
   fit$KLw = 0 # the KL from qW to prior g(W)
-  fit$Elogw = rep(log(fit$g),fit$p) # The expected log-term for elbo.
+  fit$Elogw = rep(log(fit$g$w),fit$p) # The expected log-term for elbo.
 
   fit$h2_term = -Inf # because Sigma is initialized at 0
   fit$elbo = elbo(fit)
