@@ -42,7 +42,8 @@ ebmr = function (X, y, tol = 1e-10, admm = TRUE, maxiter = 1000,
         fit = ebmr.update.Sigma.woodbury(fit,k = k)
       }
     } else {
-      fit = ebmr.update.mu.and.Sigma.direct(fit)
+      fit = ebmr.update.Sigma.direct(fit)
+      fit = ebmr.update.mu.direct(fit)
     }
 
     fit = ebmr.update.residual_variance(fit)
