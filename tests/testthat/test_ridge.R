@@ -5,7 +5,7 @@ test_that("grr results do not change after simple updates",{
   set.seed(100)
   sd = 10
   n = 20
-  p = 10
+  p = 20
   X = matrix(rnorm(n*p),ncol = p)
   btrue = rnorm(p)
   y = drop(X %*% btrue + sd*rnorm(n))
