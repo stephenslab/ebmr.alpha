@@ -1,4 +1,4 @@
-#' @description Updates parameters by fitting full GRR model
+#' @description Updates parameters by fitting full GRR model in case n<p
 #' @details Operates by performing a full SVD on Xtilde = XW^0.5, after which
 #' other computations (EM algorithm to maximize sb2; s2, and posterior computations)
 #' are cheap
@@ -13,6 +13,9 @@
 #'
 #' @return an ebmr fit
 ebmr.update.grr = function(fit, tol = 1e-3, maxiter = 1000, compute_Sigma_full=FALSE){
+
+  if(fit$n>fit$p)
+      warning("grr update is not designed for n>p; results may be unreliable")
 
   # svd computation
   Xtilde = t(fit$wbar^0.5 * t(fit$X))
