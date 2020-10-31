@@ -1,10 +1,3 @@
-ebmr.update.mu.direct = function(fit){
-  if(is.null(fit$Sigma_full)){
-    stop("update mu direct only works if Sigma_full is defined")
-  }
-  fit$mu = with(fit,drop(Sigma_full %*% Xty))
-  return(fit)
-}
 
 fitted.values = function(fit){
   with(fit,drop(X %*% mu))

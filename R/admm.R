@@ -45,10 +45,4 @@ prox_l2_het = function(x, t, lambda){
   return(x * data_prec/(data_prec + prior_prec))
 }
 
-ebmr.update.mu.admm = function(fit){
-  fit$mu = with(fit,prox_regression_svd(z - u,1/rho,y,X.svd))
-  fit$z = with(fit,prox_l2_het(mu + u,1/rho,0.5/wbar))
-  fit$u = with(fit,u + mu - z)
-  return(fit)
-}
 

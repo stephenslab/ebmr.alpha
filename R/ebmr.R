@@ -25,7 +25,7 @@
 #'
 #' @export
 #'
-ebmr = function (X, y, tol = 1e-10, maxiter = 1000, admm = FALSE, k=NULL){
+ ebmr = function (X, y, tol = 1e-10, maxiter = 1000, admm = FALSE, k=NULL){
   fit = ebmr.init(X,y)
 
   for(i in 1:maxiter){
@@ -43,25 +43,25 @@ ebmr = function (X, y, tol = 1e-10, maxiter = 1000, admm = FALSE, k=NULL){
   return(fit)
 }
 
-# fits grr model by admm updates on mu
-# updating Sigma every thin iterations
-# and using rank k approximation
-ebmr.update.grr.admm = function(fit, tol = 1e-10, maxiter = 1000, k = NULL, thin = 1){
-  warning("admm updates not fully tested; in particular tolerance check on ELBO may not be good idea")
-  for(i in 1:maxiter){
-    fit = ebmr.update.mu.admm(fit)
-    fit = ebmr.update.residual_variance(fit)
-    # Update Sigma only every "thin" iterations.
-    if((i-1) %% thin == 0){
-      fit = ebmr.update.Sigma.woodbury(fit,k = k)
-    }
-    fit = ebmr.update.elbo(fit)
-    if(abs(ebmr_get_elbodiff(fit)) < tol) # check absolute value as admm may not be monotonic?
-      break
-  }
-
-  return(fit)
-}
+# # fits grr model by admm updates on mu
+# # updating Sigma every thin iterations
+# # and using rank k approximation
+# ebmr.update.grr.admm = function(fit, tol = 1e-10, maxiter = 1000, k = NULL, thin = 1){
+#   warning("admm updates not fully tested; in particular tolerance check on ELBO may not be good idea")
+#   for(i in 1:maxiter){
+#     fit = ebmr.update.mu.admm(fit)
+#     fit = ebmr.update.residual_variance(fit)
+#     # Update Sigma only every "thin" iterations.
+#     if((i-1) %% thin == 0){
+#       fit = ebmr.update.Sigma.woodbury(fit,k = k)
+#     }
+#     fit = ebmr.update.elbo(fit)
+#     if(abs(ebmr_get_elbodiff(fit)) < tol) # check absolute value as admm may not be monotonic?
+#       break
+#   }
+#
+#   return(fit)
+# }
 
 
 # fits grr model by direct (naive) updates on mu, Sigma
