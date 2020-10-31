@@ -48,12 +48,12 @@ test_that("mu results from direct and admm updates match grr",{
   fit = ebmr.init(X,y)
   fit.grr = ebmr.update.grr(fit,tol = 1e-10,maxiter=1000)
 
-
   #this currently fails because admm does not work for sb2 neq 1
   fit.admm = ebmr.update.mu.admm(fit.grr,tol = 1e-10,maxiter=1000)
-
+  fit.direct = ebmr.update.mu.Sigma.direct(fit.grr)
 
   expect_equal(fit.admm$mu, fit.grr$mu)
+  expect_equal(fit.direct$mu, fit.grr$mu)
 
   fit$sb2 = 1
   fit$g$w = fit.grr$g$w * fit.grr$sb2
@@ -61,7 +61,6 @@ test_that("mu results from direct and admm updates match grr",{
   fit$wbar = rep(fit$g$w,p)
 
   fit.admm = ebmr.update.mu.admm(fit,tol = 1e-10,maxiter=1000)
-
   fit.direct = ebmr.update.mu.Sigma.direct(fit)
 
   expect_equal(fit.admm$mu, fit.grr$mu)
