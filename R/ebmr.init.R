@@ -14,7 +14,12 @@
 # questions: should fit contain X or just fitted values Xmu?
 # or maybe fit should contain svd for X? X=udv
 #
+#' @title Initialize ebmr fit
+#' @param X a numeric n times p matrix
+#' @param y an n vector
+#' @param sb2 scalar parameter value
 #' @importFrom stats sd
+#' @export
 ebmr.init = function(X,y,sb2=1){
   fit = list()
   fit$p = ncol(X)

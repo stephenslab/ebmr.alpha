@@ -4,7 +4,7 @@
 \alias{ebmr}
 \title{Fit Empirical Bayes Multiple Regression Model}
 \usage{
-ebmr(X, y, tol = 1e-10, admm = TRUE, maxiter = 1000, k = NULL, thin = 1)
+ebmr(X, y, tol = 1e-10, maxiter = 1000)
 }
 \arguments{
 \item{X}{An n times p numeric matrix of covariates.}
@@ -14,10 +14,10 @@ ebmr(X, y, tol = 1e-10, admm = TRUE, maxiter = 1000, k = NULL, thin = 1)
 \item{tol}{Small real number controlling convergence tolerance;
 algorithm stops when elbo changes less than \code{tol}.}
 
+\item{maxiter}{Integer indicating maximum number of iterations.}
+
 \item{admm}{If \code{admm = TRUE}, use the ADMM updates for
 updating the regression coefficients.}
-
-\item{maxiter}{Integer indicating maximum number of iterations.}
 
 \item{k}{Integer indicating the rank of the approximation to use
 for Sigma update (default \code{NULL} uses full rank)}

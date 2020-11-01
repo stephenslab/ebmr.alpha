@@ -25,19 +25,23 @@
 #'
 #' @export
 #'
- ebmr = function (X, y, tol = 1e-10, maxiter = 1000, admm = FALSE, k=NULL){
+ ebmr = function (X, y, tol = 1e-10, maxiter = 1000){ # admm = FALSE, k=NULL){
   fit = ebmr.init(X,y)
 
   for(i in 1:maxiter){
-    if(admm){
-      fit = ebmr.update.grr.admm(fit, k=k, maxiter = 1)
-    } else {
-      fit = ebmr.update.grr.direct(fit)
-    }
-    fit = ebmr.update.ebnv.ridge(fit)
+
+    fit = ebmr.update.grr(fit)
+
+    # if(admm){
+    #   fit = ebmr.update.grr.admm(fit, k=k, maxiter = 1)
+    # } else {
+    #   fit = ebmr.update.grr.direct(fit)
+    # }
+    #fit = ebmr.update.ebnv.ridge(fit)
+    fit = ebmr.update.ebnv.lasso(fit)
 
     fit = ebmr.update.elbo(fit)
-    if(ebmr_get_elbodiff(fit) < tol)
+    if(abs(ebmr_get_elbodiff(fit)) < tol) # use absolute until the elbo computation is correct
       break
   }
   return(fit)

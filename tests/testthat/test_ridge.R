@@ -18,6 +18,9 @@ test_that("grr results do not change after simple updates",{
 
   fit.rr2 = ebmr.update.ebnv.ridge(fit.rr)
   expect_equal(fit.grr,fit.rr2,tol=1e-8)
+
+  fit.rr3 = ebmr.update.residual_variance(fit.grr)
+  expect_equal(fit.grr,fit.rr3,tol=1e-8)
 })
 
 

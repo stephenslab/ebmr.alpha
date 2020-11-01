@@ -2,6 +2,7 @@
 
 S3method(coef,ebmr)
 export(ebmr)
+export(ebmr.init)
 export(ebrr_svd)
 importFrom(mvtnorm,dmvnorm)
 importFrom(stats,sd)
