@@ -1,4 +1,5 @@
 test_that("ebnv results make sense",{
+  set.seed(1)
   n = 1e5
   eta = 2
   w = rexp(n,rate=eta)

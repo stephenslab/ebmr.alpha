@@ -31,6 +31,7 @@
   for(i in 1:maxiter){
 
     fit = ebmr.update.grr(fit)
+    fit = ebmr.scale.sb2(fit)
 
     # if(admm){
     #   fit = ebmr.update.grr.admm(fit, k=k, maxiter = 1)

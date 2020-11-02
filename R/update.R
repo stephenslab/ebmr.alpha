@@ -11,6 +11,13 @@ ebmr.update.residual_variance = function(fit){
   return(fit)
 }
 
+ebmr.scale.sb2 = function(fit){
+  fit$wbar = fit$sb2 * fit$wbar
+  fit$g$w = fit$sb2 * fit$g$w
+  fit$sb2 = 1
+  return(fit)
+}
+
 
 # Return log-det of original matrix from cholesky decomposition.
 chol2logdet = function(L){

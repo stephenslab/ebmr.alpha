@@ -2,12 +2,11 @@
 ebmr.update.ebnv.lasso = function(fit){
   warning("ebnv lasso not tested; also need to work out ELBO computations")
   #need to work out the details...
-  bfit = with(fit, sqrt(mu^2 + residual_variance*Sigma_diag)) #
+  bfit = with(fit, sqrt(mu^2 + residual_variance * Sigma_diag)) #
   ebnv.res = ebnv_lasso(bfit, fit$sb2 * fit$residual_variance)
 
   fit$g$w = ebnv.res$w
   fit$wbar = ebnv.res$wbar
-
 
   return(fit)
 }

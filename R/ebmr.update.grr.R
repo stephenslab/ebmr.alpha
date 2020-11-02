@@ -1,4 +1,4 @@
-#' @description Updates parameters by fitting full GRR model in case n<p
+#' @description Updates parameters by fitting full GRR model
 #' @details Operates by performing a full SVD on Xtilde = XW^0.5, after which
 #' other computations (EM algorithm to maximize sb2; s2, and posterior computations)
 #' are cheap
@@ -14,16 +14,16 @@
 #' @return an ebmr fit
 ebmr.update.grr = function(fit, tol = 1e-3, maxiter = 1000, compute_Sigma_full=FALSE){
 
-  if(fit$n>fit$p)
-      warning("grr update is not designed for n>p; results may be unreliable")
-
   # svd computation
   Xtilde = t(fit$wbar^0.5 * t(fit$X))
   Xtilde.svd = svd(Xtilde)
 
   # maximum likelihood estimation
   ytilde = drop(t(Xtilde.svd$u) %*% fit$y)
-  yt.em3 = ridge_indep_em3(ytilde, Xtilde.svd$d^2,tol, maxiter, s2.init = fit$residual_variance, sb2.init = fit$sb2)
+  df = length(fit$y) - length(ytilde)
+  ss = sum(fit$y^2) - sum(ytilde^2)
+
+  yt.em3 = ridge_indep_em3(ytilde, Xtilde.svd$d^2, ss, df, tol, maxiter, s2.init = fit$residual_variance, sb2.init = fit$sb2)
 
   fit$residual_variance = yt.em3$s2
   fit$sb2 = yt.em3$sb2
@@ -48,17 +48,27 @@ ebmr.update.grr = function(fit, tol = 1e-3, maxiter = 1000, compute_Sigma_full=F
 # in the model y_i | theta_i \sim N(theta_i, s2), theta_i \sim N(0,sb2 s2 d2_i)
 # where y,d2 are given and (s2,sb2) are to be estimated.
 #
+# Except... I modified it to take account of additional residual sum of squares (ss)
+# and degrees of freedom parameter (df), so that we can deal with the
+# case n>p above
+#
 # However, internally it uses a different parameterization to make
 # convergence faster (see the url above).
 # Specifically it fits y_i | theta_i \sim N(sb theta_i,s^2), theta_i \sim N(0,l2 d2_i)
 # so it returns s2hat = s2
 # and sb2hat = sb2 *l2 / s2
-ridge_indep_em3 = function(y, d2, tol=1e-3, maxiter=1000, s2.init = 1, sb2.init=1, l2.init=1){
+ridge_indep_em3 = function(y, d2, ss = 0, df = 0, tol=1e-3, maxiter=1000, s2.init = 1, sb2.init=1, l2.init=1){
   k = length(y)
   s2 = s2.init
   sb2 = sb2.init
   l2 = l2.init
-  loglik = sum(dnorm(y,mean=0,sd = sqrt(sb2*l2*d2 + s2),log=TRUE))
+
+  ll = sum(dnorm(y,mean=0,sd = sqrt(sb2*l2*d2 + s2),log=TRUE))
+  # plus the part due to additional sum of squares
+  ll = ll - (df/2) * log(2*pi*s2) - ss/(2*s2)
+
+  loglik = ll
+
   for(i in 1:maxiter){
 
     prior_var = d2*l2 # prior variance for theta
@@ -70,13 +80,42 @@ ridge_indep_em3 = function(y, d2, tol=1e-3, maxiter=1000, s2.init = 1, sb2.init=
     l2 = mean((post_mean^2 + post_var)/d2)
 
     r = y - sqrt(sb2) * post_mean # residuals
-    s2 = mean(r^2 + sb2 * post_var)
-    loglik= c(loglik,sum(dnorm(y,mean=0,sd = sqrt(sb2*l2*d2 + s2),log=TRUE)))
+    s2 = (sum(r^2 + sb2 * post_var ) + ss) / (length(y) + df) # adjusted sum of squares and df
+
+    ll = sum(dnorm(y,mean=0,sd = sqrt(sb2*l2*d2 + s2),log=TRUE))
+    ll = ll - (df/2)*log(2*pi*s2) - ss/(2*s2)
+    loglik= c(loglik,ll)
+
     if((loglik[i+1]-loglik[i])<tol) break
   }
   return(list(s2=s2,sb2=sb2*l2/s2,loglik=loglik))
 }
 
 
+ridge_em3 = function(y,X, s2, sb2, l2, niter=10){
+  XtX = t(X) %*% X
+  Xty = t(X) %*% y
+  yty = t(y) %*% y
+  n = length(y)
+  p = ncol(X)
+  loglik = rep(0,niter)
+  for(i in 1:niter){
+    V = chol2inv(chol(XtX+ diag(s2/(sb2*l2),p)))
+
+    SigmaY = l2*sb2 *(X %*% t(X)) + diag(s2,n)
+    loglik[i] = mvtnorm::dmvnorm(as.vector(y),sigma = SigmaY,log=TRUE)
+
+    Sigma1 = (s2/sb2)*V  # posterior variance of b
+    mu1 = (1/sqrt(sb2))*as.vector(V %*% Xty) # posterior mean of b
+
+
+    sb2 = (sum(mu1*Xty)/sum(diag(XtX %*% (mu1 %*% t(mu1) + Sigma1))))^2
+    s2 = as.vector((yty + sb2*sum(diag(XtX %*% (mu1 %*% t(mu1) + Sigma1)))- 2*sqrt(sb2)*sum(Xty*mu1))/n)
+
+    l2 = mean(mu1^2+diag(Sigma1))
+
+  }
+  return(list(s2=s2,sb2=sb2,l2=l2,loglik=loglik,postmean=mu1*sqrt(sb2)))
+}
 
 
