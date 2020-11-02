@@ -7,7 +7,8 @@ ebmr.update.ebnv.np = function(fit){
                      s2 = fit$sb2*fit$residual_variance, wgrid = fit$g$w)
 
   fit$g$mixprop = ebnv.res$mixprop
-  fit$wbar = ebnv.res$wbar
+  fit = ebmr.set.wbar(fit,ebnv.res$wbar)
+
   warning("need to implement KL and ElogW terms for this update")
   return(fit)
 }

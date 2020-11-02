@@ -26,17 +26,26 @@ ebnv_np = function(b, s2, wgrid){
   return(list(mixprop=mixprop, wgrid=wgrid, wbar = wbar))
 }
 
-# n=1000
-# pi = rep(0.1,10)
-# wgrid = seq(0.1,10,length=10)
-# w = 10*runif(n)
-# s2 = 1
-# b = rnorm(n, 0, sqrt(s2*w))
-# fit = ebnv_np(b,s2,wgrid)
-# plot(b,sqrt(fit$wbar))
-#
-# b = rnorm(n, 0, sqrt(s2*0.001))
-# fit = ebnv_np(b,s2,wgrid)
-# plot(b,fit$wbar)
+# solve ebnv problem with exponential prior
+# model is b_j \sim N(0, s2 w_j)
+# w_j \sim g()
+# where g is Exp(mean = g$w), b and are known
+# returns the mle \hat{g} and wbar which is inverse of posterior mean of 1/w
+ebnv_exp = function(b,s2){
+  w = 2*mean(abs(b))^2/s2
+  wbar =  (1/sqrt(s2)) * (abs(b)*sqrt(w/2))
+  return(list(w=w,wbar=wbar))
+}
 
+
+# solve ebnv problem with point mass prior
+# model is b_j \sim N(0, s2 w_j)
+# w_j \sim g()
+# where g is delta(g$w), b and s2 are known
+# returns the mle \hat{g} and wbar which is inverse of posterior mean of 1/w
+ebnv_pm = function(b,s2){
+  w = mean(b^2)/s2
+  wbar =  rep(w,length(b))
+  return(list(w=w,wbar=wbar))
+}
 
