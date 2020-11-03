@@ -1,12 +1,32 @@
-#' @title Solve EBNV problem with non-parametric prior
-#' @description Solves the EBNV problem for non-parametric prior (discrete grid)
-#' @details fits the model b_j \sim N(0,s2 w_j) and w_j \sim g() by empirical
-#' Bayes, where g is non-parametric distribution approximated by a discrete distribution
-#' on a grid
-#' @param b n-vector of observations
-#' @param s2 a scalar variance parameter
-#' @param g a list with elements mixprop and w, the latter being a non-negative grid of possible values (unlike ash, 0 not allowed)
-#' @return a list with elements g and wbar (inverse of posterior mean for 1/w)
+#' @title Solve EBNV problem
+#'
+#' @description Functions for solving the Empirical Bayes Normal Variances (EBNV) problem for various
+#' prior families
+#'
+#' @details These functions fit the model
+#'
+#' b_j~N(0,s2 w_j)
+#'
+#' w_j ~ g()
+#'
+#' by empirical
+#' Bayes. They estimate the prior g, and (the inverse of the) posterior mean for each 1/w_j.
+#'
+#' @param b vector of n observations
+#'
+#' @param s2 a positive real number
+#'
+#' @param g (used only in some cases) an object with the same structure as the prior to be fit
+#' used to specify things like the grid used for discrete priors.
+#'
+#' @return A list with elements
+#'
+#' \item{g}{A list containing the details of the estimated prior}
+#'
+#' \item{wbar}{A vector containing inverses of posterior mean for 1/w}
+#'
+#' @describeIn ebnv.np Solve EBNV problem with non-parametric prior
+#' @export
 ebnv.np = function(b, s2, g){
   if(!all(g$w>0)){
     stop("elements of wgrid must be non-negative")
@@ -27,11 +47,9 @@ ebnv.np = function(b, s2, g){
   return(list(g=g, wbar = wbar))
 }
 
-# solve ebnv problem with exponential prior
-# model is b_j \sim N(0, s2 w_j)
-# w_j \sim g()
-# where g is Exp(mean = g$w), b and are known
-# returns the mle \hat{g} and wbar which is inverse of posterior mean of 1/w
+#' @describeIn ebnv.np Solve EBNV problem with exponential prior
+#' @inheritParams ebnv.np
+#' @export
 ebnv.exp = function(b,s2,g=NULL){
   w = 2*mean(abs(b))^2/s2
   wbar =  (1/sqrt(s2)) * (abs(b)*sqrt(w/2))
@@ -39,12 +57,9 @@ ebnv.exp = function(b,s2,g=NULL){
   return(list(g=g,wbar=wbar))
 }
 
-
-# solve ebnv problem with point mass prior
-# model is b_j \sim N(0, s2 w_j)
-# w_j \sim g()
-# where g is delta(g$w), b and s2 are known
-# returns the mle \hat{g} and wbar which is inverse of posterior mean of 1/w
+#' @describeIn ebnv.np Solve EBNV problem with point mass prior
+#' @inheritParams ebnv.np
+#' @export
 ebnv.pm = function(b,s2,g=NULL){
   w = mean(b^2)/s2
   wbar =  rep(w,length(b))
@@ -52,9 +67,9 @@ ebnv.pm = function(b,s2,g=NULL){
   return(list(g=g,wbar=wbar))
 }
 
-# mix ebnv for mixture of exponentials
-# g is mixture of exponentials, with means given by grid
-
+#' @describeIn ebnv.np Solve EBNV problem with mixture of exponentials prior
+#' @inheritParams ebnv.np
+#' @export
 ebnv.exp_mix = function(b, s2, g){
   if(!all(g$w>0)){
     stop("elements of wgrid must be non-negative")
