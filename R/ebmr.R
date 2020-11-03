@@ -24,21 +24,21 @@
 #' @return An object of class "ebmr" that contains fit details.
 #'
 #' @export
-#'
- ebmr = function (X, y, tol = 1e-10, maxiter = 1000, ebnv_fn = ebnv_exp){ # admm = FALSE, k=NULL){
+ebmr = function (X, y, tol = 1e-10, maxiter = 1000, ebnv_fn = ebnv_exp){
   fit = ebmr.init(X,y)
+  fit = ebmr.update(fit, tol, maxiter, ebnv_fn)
+  return(fit)
+}
+
+#'
+#' @export
+ebmr.update = function (fit, tol = 1e-10, maxiter = 1000, ebnv_fn = ebnv_exp){
 
   for(i in 1:maxiter){
 
     fit = ebmr.update.grr(fit)
     #fit = ebmr.scale.sb2(fit)
 
-    # if(admm){
-    #   fit = ebmr.update.grr.admm(fit, k=k, maxiter = 1)
-    # } else {
-    #   fit = ebmr.update.grr.direct(fit)
-    # }
-    #fit = ebmr.update.ebnv.ridge(fit)
     fit = ebmr.update.ebnv(fit,ebnv_fn)
 
     fit = ebmr.update.elbo(fit)
@@ -47,6 +47,9 @@
   }
   return(fit)
 }
+
+
+
 
 # # fits grr model by admm updates on mu
 # # updating Sigma every thin iterations

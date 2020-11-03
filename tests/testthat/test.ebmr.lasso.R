@@ -9,7 +9,7 @@ test_that("eb lasso results match previous veb_lasso implementation",{
   s2 = 1
   y = X %*% cbind(btrue) + rnorm(n,sd=sqrt(s2))
 
-  y.fit = ebmr(X,y,maxiter=200,tol=1e-3)
+  suppressWarnings(y.fit <- ebmr(X,y,maxiter=200,tol=1e-3))
   y.fit$residual_variance
 
   y.blasso = blasso_veb(y,X,btrue,niter = 200)

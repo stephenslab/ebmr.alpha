@@ -16,7 +16,7 @@ test_that("grr results do not change after simple updates",{
   fit.rr = ebmr.update.Sigma.woodbury(fit.grr, compute_Sigma_full = TRUE) # should not move as it should be optimal
   expect_equal(fit.grr,fit.rr,tol=1e-8)
 
-  fit.rr = ebmr.update.ebnv.ridge(fit.rr)
+  suppressWarnings(fit.rr <- ebmr.update.ebnv(fit.rr, ebnv_fn = ebnv_pm))
   expect_equal(fit.grr,fit.rr,tol=1e-8)
 
   fit.rr = ebmr.update.residual_variance(fit.rr)

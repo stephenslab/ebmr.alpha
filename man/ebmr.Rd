@@ -4,7 +4,7 @@
 \alias{ebmr}
 \title{Fit Empirical Bayes Multiple Regression Model}
 \usage{
-ebmr(X, y, tol = 1e-10, maxiter = 1000)
+ebmr(X, y, tol = 1e-10, maxiter = 1000, ebnv_fn = ebnv_exp)
 }
 \arguments{
 \item{X}{An n times p numeric matrix of covariates.}
