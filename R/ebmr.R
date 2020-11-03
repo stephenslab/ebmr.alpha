@@ -36,7 +36,7 @@ ebmr.update = function (fit, tol = 1e-10, maxiter = 1000, ebnv_fn = ebnv.exp){
 
   for(i in 1:maxiter){
 
-    fit = ebmr.update.grr(fit)
+    fit = ebmr.update.grr.svd(fit)
     #fit = ebmr.scale.sb2(fit)
 
     fit = ebmr.update.ebnv(fit,ebnv_fn)

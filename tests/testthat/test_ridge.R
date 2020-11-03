@@ -10,7 +10,7 @@ test_that("grr results do not change after simple updates",{
   btrue = rnorm(p)
   y = drop(X %*% btrue + sd*rnorm(n))
   fit.ebmr = ebmr.init(X,y,1)
-  fit.grr = ebmr.update.grr(fit.ebmr, compute_Sigma_full = TRUE, tol=1-15)
+  fit.grr = ebmr.update.grr.svd(fit.ebmr, compute_Sigma_full = TRUE, tol=1-15)
   fit.grr = ebmr.update.elbo(fit.grr)
 
   fit.rr = ebmr.update.Sigma.woodbury(fit.grr, compute_Sigma_full = TRUE) # should not move as it should be optimal
@@ -47,7 +47,7 @@ test_that("grr results match simple em",{
   btrue = rnorm(p)
   y = drop(X %*% btrue + sd*rnorm(n))
   fit = ebmr.init(X,y)
-  fit.grr = ebmr.update.grr(fit,tol = 1e-10,maxiter=1000)
+  fit.grr = ebmr.update.grr.svd(fit,tol = 1e-10,maxiter=1000)
   fit.em = ridge_em1(y,X,1,1,1000)
   expect_equal(fit.grr$residual_variance,fit.em$s2, tol=1e-3)
   expect_equal(fit.grr$sb2*fit.grr$g$w,fit.em$sb2/fit.em$s2, tol=1e-3)
@@ -63,7 +63,7 @@ test_that("mu results from direct and admm updates match grr",{
   btrue = rnorm(p)
   y = drop(X %*% btrue + sd*rnorm(n))
   fit = ebmr.init(X,y)
-  fit.grr = ebmr.update.grr(fit,tol = 1e-10,maxiter=1000)
+  fit.grr = ebmr.update.grr.svd(fit,tol = 1e-10,maxiter=1000)
   fit.admm = ebmr.update.mu.admm(fit.grr,tol = 1e-10,maxiter=1000)
   fit.direct = ebmr.update.mu.Sigma.direct(fit.grr)
 
@@ -82,7 +82,7 @@ test_that("mu results from direct and admm updates match grr",{
 
   # Test for non-constant wbar
   fit = ebmr.set.wbar(fit, runif(p))
-  fit.grr = ebmr.update.grr(fit,tol = 1e-10,maxiter=1000)
+  fit.grr = ebmr.update.grr.svd(fit,tol = 1e-10,maxiter=1000)
   fit.admm = ebmr.update.mu.admm(fit.grr,tol = 1e-10,maxiter=1000)
   fit.direct = ebmr.update.mu.Sigma.direct(fit.grr)
 

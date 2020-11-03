@@ -1,18 +1,24 @@
-#' @description Updates parameters by fitting full GRR model
-#' @details Operates by performing a full SVD on Xtilde = XW^0.5, after which
-#' other computations (EM algorithm to maximize sb2; s2, and posterior computations)
-#' are cheap
+#' @title Update by fitting GRR model
 #'
-#' @param fit a ebmr fit
+#' @description Updates parameters of an EBMR fit by fitting the full GRR model,
+#' including esitmating hyperparameters (residual variance and prior scaling factor).
+#' The method uses an SVD on Xtilde = XW^0.5, after which
+#' other computations (EM algorithm to maximize hyperparameters, and posterior computations)
+#' are cheap.
+#'
+#' @details The code is based on the ideas at https://stephens999.github.io/misc/ridge_em_svd.html
+#' but extended to deal with case where n>p as well as n<=p.
+#'
+#' @param fit a previous ebmr fit
 #'
 #' @param tol a tolerance for the EM algorithm
 #'
 #' @param maxiter maximum number of iterations for EM algorithm
 #'
-#' @param compute_sigma_full set to true to compute full Sigma matrix for testing purposes
+#' @param compute_sigma_full boolean flag; set to TRUE to compute full Sigma matrix for testing purposes
 #'
-#' @return an ebmr fit
-ebmr.update.grr = function(fit, tol = 1e-3, maxiter = 1000, compute_Sigma_full=FALSE){
+#' @return an updated ebmr fit
+ebmr.update.grr.svd = function(fit, tol = 1e-3, maxiter = 1000, compute_Sigma_full=FALSE){
 
   # svd computation
   Xtilde = t(fit$wbar^0.5 * t(fit$X))
