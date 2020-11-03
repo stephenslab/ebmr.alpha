@@ -7,7 +7,7 @@
 #' @param s2 a scalar variance parameter
 #' @param g a list with elements mixprop and w, the latter being a non-negative grid of possible values (unlike ash, 0 not allowed)
 #' @return a list with elements g and wbar (inverse of posterior mean for 1/w)
-ebnv_np = function(b, s2, g){
+ebnv.np = function(b, s2, g){
   if(!all(g$w>0)){
     stop("elements of wgrid must be non-negative")
   }
@@ -32,7 +32,7 @@ ebnv_np = function(b, s2, g){
 # w_j \sim g()
 # where g is Exp(mean = g$w), b and are known
 # returns the mle \hat{g} and wbar which is inverse of posterior mean of 1/w
-ebnv_exp = function(b,s2,g=NULL){
+ebnv.exp = function(b,s2,g=NULL){
   w = 2*mean(abs(b))^2/s2
   wbar =  (1/sqrt(s2)) * (abs(b)*sqrt(w/2))
   g$w=w
@@ -45,7 +45,7 @@ ebnv_exp = function(b,s2,g=NULL){
 # w_j \sim g()
 # where g is delta(g$w), b and s2 are known
 # returns the mle \hat{g} and wbar which is inverse of posterior mean of 1/w
-ebnv_pm = function(b,s2,g=NULL){
+ebnv.pm = function(b,s2,g=NULL){
   w = mean(b^2)/s2
   wbar =  rep(w,length(b))
   g$w =w
@@ -55,12 +55,12 @@ ebnv_pm = function(b,s2,g=NULL){
 # mix ebnv for mixture of exponentials
 # g is mixture of exponentials, with means given by grid
 
-ebnv_exp_mix = function(b, s2, g){
+ebnv.exp_mix = function(b, s2, g){
   if(!all(g$w>0)){
     stop("elements of wgrid must be non-negative")
   }
-  std_obs = t(outer(b,sqrt(s2*g$w),"/")) # standardized observations
-  loglik.matrix = t(log(1/sqrt(s2*g$w)) + dnorm(std_obs,log=TRUE))
+  lambda = sqrt(2/(s2*g$w)) # the K rate parameters of double-exponential, one per gridpoint
+  loglik.matrix = t(log(lambda) - outer(lambda, abs(b), "*")) #n by K matrix
   loglik.max = apply(loglik.matrix, 1, max)
   lik.matrix = exp(loglik.matrix-loglik.max)
 
@@ -69,7 +69,8 @@ ebnv_exp_mix = function(b, s2, g){
   postprob = t(mixprop * t(lik.matrix)) # likelihood * prior
   postprob = postprob/rowSums(postprob) # normalize
 
-  wbar = 1/colSums((1/g$w) * t(postprob))
+  wbar = rowSums(outer(s2*abs(b)^(-1),lambda, "*") * postprob)^(-1)
+
   g$mixprop = mixprop
 
   return(list(g=g, wbar = wbar))

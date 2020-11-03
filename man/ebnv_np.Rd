@@ -4,17 +4,17 @@
 \alias{ebnv_np}
 \title{Solve EBNV problem with non-parametric prior}
 \usage{
-ebnv_np(b, s2, wgrid)
+ebnv_np(b, s2, g)
 }
 \arguments{
 \item{b}{n-vector of observations}
 
 \item{s2}{a scalar variance parameter}
 
-\item{wgrid}{a discrete grid of non-negative values (unlike ash, 0 not allowed)}
+\item{g}{a list with elements mixprop and w, the latter being a non-negative grid of possible values (unlike ash, 0 not allowed)}
 }
 \value{
-a list with elements mixprop, wgrid and wbar (inverse of posterior mean for 1/w)
+a list with elements g and wbar (inverse of posterior mean for 1/w)
 }
 \description{
 Solves the EBNV problem for non-parametric prior (discrete grid)

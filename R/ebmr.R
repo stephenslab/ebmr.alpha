@@ -24,7 +24,7 @@
 #' @return An object of class "ebmr" that contains fit details.
 #'
 #' @export
-ebmr = function (X, y, tol = 1e-10, maxiter = 1000, ebnv_fn = ebnv_exp){
+ebmr = function (X, y, tol = 1e-10, maxiter = 1000, ebnv_fn = ebnv.exp){
   fit = ebmr.init(X,y)
   fit = ebmr.update(fit, tol, maxiter, ebnv_fn)
   return(fit)
@@ -32,7 +32,7 @@ ebmr = function (X, y, tol = 1e-10, maxiter = 1000, ebnv_fn = ebnv_exp){
 
 #'
 #' @export
-ebmr.update = function (fit, tol = 1e-10, maxiter = 1000, ebnv_fn = ebnv_exp){
+ebmr.update = function (fit, tol = 1e-10, maxiter = 1000, ebnv_fn = ebnv.exp){
 
   for(i in 1:maxiter){
 

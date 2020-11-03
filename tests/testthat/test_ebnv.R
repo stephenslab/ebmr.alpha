@@ -5,12 +5,12 @@ test_that("ebnv results make sense",{
   w = rexp(n,rate=eta)
   s2 = 9
   b = rnorm(n,0,sd= sqrt(s2*w))
-  temp=ebnv_exp(b,s2)
+  temp=ebnv.exp(b,s2)
 
   expect_equal(temp$g$w,1/eta,tol=1e-2)
   expect_equal(as.numeric(lm(w ~ temp$wbar)$coef[2]),1,tol=1e-2)
 
-  temp=ebnv_np(b,s2,g=list(w=seq(1e-5,2,length=20)))
+  temp=ebnv.np(b,s2,g=list(w=seq(1e-5,2,length=20)))
 
   expect_equal(sum(temp$g$mixprop * temp$g$w),1/eta,tol=1e-2)
   expect_equal(as.numeric(lm(w ~ temp$wbar)$coef[2]),1,tol=1e-1)
@@ -21,12 +21,12 @@ test_that("ebnv results make sense",{
   w = rexp(n,rate=eta)
   s2 = 9
   b = rnorm(n,0,sd= sqrt(s2*w))
-  temp=ebnv_exp(b,s2)
+  temp=ebnv.exp(b,s2)
 
   expect_equal(temp$g$w,1/eta,tol=1e-2)
   expect_equal(as.numeric(lm(w ~ temp$wbar)$coef[2]),1,tol=1e-2)
 
-  temp=ebnv_np(b,s2,g=list(w=seq(1e-5,2,length=20)))
+  temp=ebnv.np(b,s2,g=list(w=seq(1e-5,2,length=20)))
 
   expect_equal(sum(temp$g$mixprop * temp$g$w),1/eta,tol=1e-2)
   expect_equal(as.numeric(lm(w ~ temp$wbar)$coef[2]),1,tol=1e-1)
