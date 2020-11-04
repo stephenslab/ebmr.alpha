@@ -1,7 +1,7 @@
 #' @title Fit Empirical Bayes Multiple Regression Model
 #'
-#' @description This is a new approach based on generalized ridge
-#'   regression.
+#' @description Fits multiple regression model using a new empirical Bayes variational
+#' approach based on generalized ridge regression (GRR).
 #'
 #' @param X An n times p numeric matrix of covariates.
 #'
@@ -10,33 +10,52 @@
 #' @param tol Small real number controlling convergence tolerance;
 #'   algorithm stops when elbo changes less than \code{tol}.
 #'
-#' @param admm If \code{admm = TRUE}, use the ADMM updates for
-#'   updating the regression coefficients.
-#'
 #' @param maxiter Integer indicating maximum number of iterations.
 #'
-#' @param k Integer indicating the rank of the approximation to use
-#'   for Sigma update (default \code{NULL} uses full rank)
+#' @param ebnv_fn Function for solving the Empirical Bayes Normal Variances problem.
 #'
-#' @param thin Integer indicating how often to update Sigma (e.g.,
-#'   \code{thin = 10} means update every 10 iterations).
+#' @param compute_mode Boolean indicating whether to use the mode (rather than the mean). If used
+#' with ebnv_fn = ebnv.exp then this produces the Lasso solution rather than Bayesian Lasso.
 #'
 #' @return An object of class "ebmr" that contains fit details.
 #'
+#'
+#' @examples
+#' set.seed(100)
+#' n = 50
+#' p = 200
+#' X = matrix(rnorm(n*p),nrow=n,ncol=p)
+#' btrue = rep(0,p)
+#' btrue[1] = 1
+#' btrue[2] = -1
+#' y = X %*% btrue + rnorm(n)
+#'
+#' y.fit.ebr = ebmr(X,y, maxiter = 200, ebnv_fn = ebnv.pm)
+#' y.fit.eblasso = ebmr(X,y, maxiter = 200, ebnv_fn = ebnv.exp)
+#' y.fit.eblasso.mode = ebmr(X,y, maxiter = 200, ebnv_fn = ebnv.exp, compute_mode=TRUE)
+#'
+#' y.fit.ebash = ebmr.alpha:::ebmr.set.prior(y.fit.eblasso,ebmr.alpha:::exp2np(y.fit.eblasso$g))
+#' y.fit.ebash = ebmr.update(y.fit.ebash, maxiter = 200, ebnv_fn = ebnv.np)
+#'
+#' plot(btrue, coef(y.fit.ebr))
+#' plot(btrue, coef(y.fit.eblasso), col=2)
+#' plot(btrue, coef(y.fit.eblasso.mode), col=3)
+#' plot(btrue, coef(y.fit.ebash), col=4)
 #' @export
-ebmr = function (X, y, tol = 1e-10, maxiter = 1000, ebnv_fn = ebnv.exp){
+ebmr = function (X, y, tol = 1e-8, maxiter = 1000, ebnv_fn = ebnv.exp, compute_mode = FALSE){
   fit = ebmr.init(X,y)
-  fit = ebmr.update(fit, tol, maxiter, ebnv_fn)
+  fit = ebmr.update(fit, tol, maxiter, ebnv_fn, compute_mode)
   return(fit)
 }
 
-#'
+#' @describeIn ebmr Updates a previous EBMR fit, usually using a new prior family
+#' @param fit The previous EBMR fit
 #' @export
-ebmr.update = function (fit, tol = 1e-10, maxiter = 1000, ebnv_fn = ebnv.exp){
+ebmr.update = function (fit, tol = 1e-8, maxiter = 1000, ebnv_fn = ebnv.exp, compute_mode = FALSE){
 
   for(i in 1:maxiter){
 
-    fit = ebmr.update.grr.svd(fit)
+    fit = ebmr.update.grr.svd(fit, compute_Sigma_diag = !compute_mode)
     #fit = ebmr.scale.sb2(fit)
 
     fit = ebmr.update.ebnv(fit,ebnv_fn)
@@ -49,8 +68,14 @@ ebmr.update = function (fit, tol = 1e-10, maxiter = 1000, ebnv_fn = ebnv.exp){
 }
 
 
-
-
+# @param admm If \code{admm = TRUE}, use the ADMM updates for
+#   updating the regression coefficients.
+# @param k Integer indicating the rank of the approximation to use
+#   for Sigma update (default \code{NULL} uses full rank)
+#
+# @param thin Integer indicating how often to update Sigma (e.g.,
+#   \code{thin = 10} means update every 10 iterations).
+#
 # # fits grr model by admm updates on mu
 # # updating Sigma every thin iterations
 # # and using rank k approximation

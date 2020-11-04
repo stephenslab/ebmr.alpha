@@ -2,9 +2,25 @@
 % Please edit documentation in R/ebmr.R
 \name{ebmr}
 \alias{ebmr}
+\alias{ebmr.update}
 \title{Fit Empirical Bayes Multiple Regression Model}
 \usage{
-ebmr(X, y, tol = 1e-10, maxiter = 1000, ebnv_fn = ebnv.exp)
+ebmr(
+  X,
+  y,
+  tol = 1e-08,
+  maxiter = 1000,
+  ebnv_fn = ebnv.exp,
+  compute_mode = FALSE
+)
+
+ebmr.update(
+  fit,
+  tol = 1e-08,
+  maxiter = 1000,
+  ebnv_fn = ebnv.exp,
+  compute_mode = FALSE
+)
 }
 \arguments{
 \item{X}{An n times p numeric matrix of covariates.}
@@ -16,19 +32,44 @@ algorithm stops when elbo changes less than \code{tol}.}
 
 \item{maxiter}{Integer indicating maximum number of iterations.}
 
-\item{admm}{If \code{admm = TRUE}, use the ADMM updates for
-updating the regression coefficients.}
+\item{ebnv_fn}{Function for solving the Empirical Bayes Normal Variances problem.}
 
-\item{k}{Integer indicating the rank of the approximation to use
-for Sigma update (default \code{NULL} uses full rank)}
+\item{compute_mode}{Boolean indicating whether to use the mode (rather than the mean). If used
+with ebnv_fn = ebnv.exp then this produces the Lasso solution rather than Bayesian Lasso.}
 
-\item{thin}{Integer indicating how often to update Sigma (e.g.,
-\code{thin = 10} means update every 10 iterations).}
+\item{fit}{The previous EBMR fit}
 }
 \value{
 An object of class "ebmr" that contains fit details.
 }
 \description{
-This is a new approach based on generalized ridge
-  regression.
+Fits multiple regression model using a new empirical Bayes variational
+approach based on generalized ridge regression (GRR).
+}
+\section{Functions}{
+\itemize{
+\item \code{ebmr.update}: Updates a previous EBMR fit, usually using a new prior family
+}}
+
+\examples{
+set.seed(100)
+n = 50
+p = 200
+X = matrix(rnorm(n*p),nrow=n,ncol=p)
+btrue = rep(0,p)
+btrue[1] = 1
+btrue[2] = -1
+y = X \%*\% btrue + rnorm(n)
+
+y.fit.ebr = ebmr(X,y, maxiter = 200, ebnv_fn = ebnv.pm)
+y.fit.eblasso = ebmr(X,y, maxiter = 200, ebnv_fn = ebnv.exp)
+y.fit.eblasso.mode = ebmr(X,y, maxiter = 200, ebnv_fn = ebnv.exp, compute_mode=TRUE)
+
+y.fit.ebash = ebmr.alpha:::ebmr.set.prior(y.fit.eblasso,ebmr.alpha:::exp2np(y.fit.eblasso$g))
+y.fit.ebash = ebmr.update(y.fit.ebash, maxiter = 200, ebnv_fn = ebnv.np)
+
+plot(btrue, coef(y.fit.ebr))
+plot(btrue, coef(y.fit.eblasso), col=2)
+plot(btrue, coef(y.fit.eblasso.mode), col=3)
+plot(btrue, coef(y.fit.ebash), col=4)
 }

@@ -12,7 +12,7 @@ ebmr.update.residual_variance = function(fit){
 }
 
 ebmr.scale.sb2 = function(fit){
-  fit$wbar = fit$sb2 * fit$wbar
+  fit = ebmr.set.wbar(fit, fit$sb2 * fit$wbar)
   fit$g$w = fit$sb2 * fit$g$w
   fit$sb2 = 1
   return(fit)

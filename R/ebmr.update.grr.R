@@ -15,10 +15,12 @@
 #'
 #' @param maxiter maximum number of iterations for EM algorithm
 #'
-#' @param compute_sigma_full boolean flag; set to TRUE to compute full Sigma matrix for testing purposes
+#' @param compute_Sigma_diag boolean flag; set to TRUE to compute the diagonal of the posterior variance, otherwise this variance is set to 0.
+#'
+#' @param compute_Sigma_full boolean flag; set to TRUE to compute full Sigma matrix for testing purposes
 #'
 #' @return an updated ebmr fit
-ebmr.update.grr.svd = function(fit, tol = 1e-3, maxiter = 1000, compute_Sigma_full=FALSE){
+ebmr.update.grr.svd = function(fit, tol = 1e-8, maxiter = 1000, compute_Sigma_diag = TRUE, compute_Sigma_full=FALSE){
 
   # svd computation
   Xtilde = t(fit$wbar^0.5 * t(fit$X))
@@ -34,7 +36,11 @@ ebmr.update.grr.svd = function(fit, tol = 1e-3, maxiter = 1000, compute_Sigma_fu
   fit$residual_variance = yt.em3$s2
   fit$sb2 = yt.em3$sb2
 
-  fit$Sigma_diag = Sigma1_diag_woodbury_svd(fit$wbar,Xtilde.svd,fit$sb2)
+  if(compute_Sigma_diag){
+    fit$Sigma_diag = Sigma1_diag_woodbury_svd(fit$wbar,Xtilde.svd,fit$sb2)
+  } else {
+    fit$Sigma_diag = rep(0, fit$p)
+  }
 
   if(compute_Sigma_full){
     fit$Sigma_full = Sigma1_woodbury_svd(fit$wbar,Xtilde.svd,fit$sb2)
