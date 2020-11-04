@@ -28,13 +28,13 @@ test_that("grr results do not change after simple updates",{
   #scale by sb2 and then refit
   fit.grr = ebmr.scale.sb2(fit.grr)
   fit.rr = ebmr.update.Sigma.woodbury(fit.grr, compute_Sigma_full = TRUE) # should not move as it should be optimal
-  expect_equal(fit.rr,fit.rr,tol=1e-8)
+  expect_equal(fit.rr$Sigma_diag,fit.grr$Sigma_diag,tol=1e-8)
 
   fit.rr = ebmr.update.residual_variance(fit.rr)
-  expect_equal(fit.grr,fit.rr,tol=1e-8)
+  expect_equal(fit.grr$residual_variance,fit.rr$residual_variance,tol=1e-8)
 
   fit.rr = ebmr.update.mu.Sigma.direct(fit.rr)
-  expect_equal(fit.grr,fit.rr,tol=1e-8)
+  expect_equal(fit.grr$mu,fit.rr$mu,tol=1e-8)
 })
 
 

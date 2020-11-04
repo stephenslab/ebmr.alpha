@@ -2,7 +2,7 @@ logdet = function (x)
   as.numeric(determinant(x,logarithm = TRUE)$modulus)
 
 c_func = function(fit){
-  with(fit,-0.5*n*log(2*pi*residual_variance) - (p/2)*log(sb2) - 0.5*sum(Elogw))
+  with(fit,p/2 -0.5*n*log(2*pi*residual_variance) - (p/2)*log(sb2) - 0.5*sum(Elogw))
 }
 
 h1_func = function(fit){
