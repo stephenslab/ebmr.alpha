@@ -50,6 +50,8 @@ ebmr.update.grr.svd = function(fit, tol = 1e-8, maxiter = 1000, compute_Sigma_di
 
   fit$h2_term = -0.5*fit$p + 0.5*sum(log(fit$sb2*fit$wbar)) - 0.5*sum(log(1+fit$sb2*Xtilde.svd$d^2))
 
+  #fit = ebmr.update.ebnv(fit, ebnv.pm) # done to add the correct logdet_KL_term
+
   return(fit)
 }
 

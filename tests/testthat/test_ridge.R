@@ -14,9 +14,12 @@ test_that("grr results do not change after simple updates",{
   fit.grr = ebmr.update.elbo(fit.grr)
 
   fit.rr = ebmr.update.Sigma.woodbury(fit.grr, compute_Sigma_full = TRUE) # should not move as it should be optimal
+
   expect_equal(fit.grr,fit.rr,tol=1e-8)
 
   suppressWarnings(fit.rr <- ebmr.update.ebnv(fit.rr, ebnv_fn = ebnv.pm))
+  fit.grr$logdet_KL_term = fit.rr$logdet_KL_term # force these to be equal since fit.grr does not include that term
+
   expect_equal(fit.grr,fit.rr,tol=1e-8)
 
   fit.rr = ebmr.update.residual_variance(fit.rr)
@@ -67,8 +70,8 @@ test_that("mu results from direct and admm updates match grr",{
   fit.admm = ebmr.update.mu.admm(fit.grr,tol = 1e-10,maxiter=1000)
   fit.direct = ebmr.update.mu.Sigma.direct(fit.grr)
 
-  expect_equal(fit.admm$mu, fit.grr$mu)
-  expect_equal(fit.direct$mu, fit.grr$mu)
+  expect_equal(fit.admm$mu, fit.grr$mu, tol=1e-5)
+  expect_equal(fit.direct$mu, fit.grr$mu, tol=1e-5)
 
   fit$sb2 = 1
   fit$g$w = fit.grr$g$w * fit.grr$sb2
@@ -77,8 +80,8 @@ test_that("mu results from direct and admm updates match grr",{
 
   fit.admm = ebmr.update.mu.admm(fit,tol = 1e-10,maxiter=1000)
   fit.direct = ebmr.update.mu.Sigma.direct(fit)
-  expect_equal(fit.admm$mu, fit.grr$mu)
-  expect_equal(fit.direct$mu, fit.grr$mu)
+  expect_equal(fit.admm$mu, fit.grr$mu, tol=1e-5)
+  expect_equal(fit.direct$mu, fit.grr$mu, tol=1e-5)
 
   # Test for non-constant wbar
   fit = ebmr.set.wbar(fit, runif(p))
@@ -86,8 +89,8 @@ test_that("mu results from direct and admm updates match grr",{
   fit.admm = ebmr.update.mu.admm(fit.grr,tol = 1e-10,maxiter=1000)
   fit.direct = ebmr.update.mu.Sigma.direct(fit.grr)
 
-  expect_equal(fit.admm$mu, fit.grr$mu)
-  expect_equal(fit.direct$mu, fit.grr$mu)
+  expect_equal(fit.admm$mu, fit.grr$mu, tol=1e-5)
+  expect_equal(fit.direct$mu, fit.grr$mu, tol=1e-5)
 
 
 })

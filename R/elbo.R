@@ -1,8 +1,9 @@
 logdet = function (x)
   as.numeric(determinant(x,logarithm = TRUE)$modulus)
 
+# c_func does not include log det W term as it is included in logdet_KL_term
 c_func = function(fit){
-  with(fit,p/2 -0.5*n*log(2*pi*residual_variance) - (p/2)*log(sb2) - 0.5*sum(Elogw))
+  with(fit,p/2 -0.5*n*log(2*pi*residual_variance) - (p/2)*log(sb2) )
 }
 
 h1_func = function(fit){
@@ -18,7 +19,7 @@ h2_func = function(fit){
 }
 
 elbo = function(fit){
-  return(c_func(fit) + h1_func(fit) + fit$h2_term + fit$KLw)
+  return(c_func(fit) + h1_func(fit) + fit$h2_term + fit$logdet_KL_term)
 }
 
 # Compute X'X from the svd of X.

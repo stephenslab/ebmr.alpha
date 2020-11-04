@@ -25,6 +25,9 @@
 #'
 #' \item{wbar}{A vector containing inverses of posterior mean for 1/w}
 #'
+#' \item{loglik}{The log-likelihood p(b | s2, ghat)}
+#'
+#'
 #' @describeIn ebnv.np Solve EBNV problem with non-parametric prior
 #' @export
 ebnv.np = function(b, s2, g){
@@ -44,7 +47,7 @@ ebnv.np = function(b, s2, g){
   wbar = 1/colSums((1/g$w) * t(postprob))
   g$mixprop = mixprop
 
-  return(list(g=g, wbar = wbar))
+  return(list(g=g, wbar = wbar, loglik=0))
 }
 
 #' @describeIn ebnv.np Solve EBNV problem with exponential prior
@@ -54,7 +57,11 @@ ebnv.exp = function(b,s2,g=NULL){
   w = 2*mean(abs(b))^2/s2
   wbar =  (1/sqrt(s2)) * (abs(b)*sqrt(w/2))
   g$w=w
-  return(list(g=g,wbar=wbar))
+
+  # logllikelihood under double exponential on b
+  loglik = sum(log(0.5) + dexp(b, rate= sqrt(2/(w*s2)), log=TRUE ))
+
+  return(list(g=g,wbar=wbar, loglik = loglik))
 }
 
 #' @describeIn ebnv.np Solve EBNV problem with point mass prior
@@ -64,7 +71,8 @@ ebnv.pm = function(b,s2,g=NULL){
   w = mean(b^2)/s2
   wbar =  rep(w,length(b))
   g$w =w
-  return(list(g=g,wbar=wbar))
+  loglik = sum(dnorm(b,0,s2*w, log=TRUE))
+  return(list(g=g,wbar=wbar, loglik=loglik))
 }
 
 #' @describeIn ebnv.np Solve EBNV problem with mixture of exponentials prior
@@ -88,6 +96,6 @@ ebnv.exp_mix = function(b, s2, g){
 
   g$mixprop = mixprop
 
-  return(list(g=g, wbar = wbar))
+  return(list(g=g, wbar = wbar, loglik = 0))
 }
 
