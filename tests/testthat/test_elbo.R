@@ -6,7 +6,6 @@ test_that("elbo computation matches log likelihood for ridge",{
   X = matrix(rnorm(n*p),ncol = p)
   btrue = rnorm(p)
   y = drop(X %*% btrue + sd*rnorm(n))
-  fit.init = ebmr.init(X,y)
-  fit.grr = ebmr.update.grr.svd(fit.init,tol=1e-10,maxiter =1000)
+  suppressWarnings(fit.grr <- ebmr(X,y,ebnv_fn = ebnv.pm))
   expect_equal(elbo(fit.grr),compute.ridge.loglik(fit.grr))
 })
