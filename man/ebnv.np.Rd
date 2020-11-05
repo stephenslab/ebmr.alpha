@@ -29,6 +29,8 @@ A list with elements
 \item{g}{A list containing the details of the estimated prior}
 
 \item{wbar}{A vector containing inverses of posterior mean for 1/w}
+
+\item{loglik}{The log-likelihood p(b | s2, ghat)}
 }
 \description{
 Functions for solving the Empirical Bayes Normal Variances (EBNV) problem for various

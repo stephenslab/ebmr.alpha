@@ -71,7 +71,7 @@ ebnv.pm = function(b,s2,g=NULL){
   w = mean(b^2)/s2
   wbar =  rep(w,length(b))
   g$w =w
-  loglik = sum(dnorm(b,0,s2*w, log=TRUE))
+  loglik = sum(dnorm(b,0,sqrt(s2*w), log=TRUE))
   return(list(g=g,wbar=wbar, loglik=loglik))
 }
 
