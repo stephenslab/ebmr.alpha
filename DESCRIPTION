@@ -13,7 +13,7 @@ Description: Implements scalable empirical Bayes methods for multiple
 License: MIT + file LICENSE
 URL: https://github.com/stephenslab/ebmr.alpha
 BugReports: https://github.com/stephenslab/ebmr.alpha/issues
-Imports: mvtnorm, mixsqp
+Imports: mvtnorm, mixsqp, R.utils
 Suggests: testthat
 LazyData: true
 NeedsCompilation: no

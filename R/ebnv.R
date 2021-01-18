@@ -16,7 +16,7 @@
 #'
 #' @param s2 a positive real number
 #'
-#' @param g (used only in some cases) an object with the same structure as the prior to be fit
+#' @param g (present only in some cases) an object with the same structure as the prior to be fit
 #' used to specify things like the grid used for discrete priors.
 #'
 #' @return A list with elements
@@ -53,10 +53,10 @@ ebnv.np = function(b, s2, g){
 #' @describeIn ebnv.np Solve EBNV problem with exponential prior
 #' @inheritParams ebnv.np
 #' @export
-ebnv.exp = function(b,s2,g=NULL){
+ebnv.exp = function(b,s2){
   w = 2*mean(abs(b))^2/s2
   wbar =  (1/sqrt(s2)) * (abs(b)*sqrt(w/2))
-  g$w=w
+  g = list(mixprop = c(1), w=w)
 
   # logllikelihood under double exponential on b
   loglik = sum(log(0.5) + dexp(b, rate= sqrt(2/(w*s2)), log=TRUE ))
@@ -67,10 +67,10 @@ ebnv.exp = function(b,s2,g=NULL){
 #' @describeIn ebnv.np Solve EBNV problem with point mass prior
 #' @inheritParams ebnv.np
 #' @export
-ebnv.pm = function(b,s2,g=NULL){
+ebnv.pm = function(b,s2){
   w = mean(b^2)/s2
   wbar =  rep(w,length(b))
-  g$w =w
+  g = list(mixprop = c(1), w = w)
   loglik = sum(dnorm(b,0,sqrt(s2*w), log=TRUE))
   return(list(g=g,wbar=wbar, loglik=loglik))
 }
@@ -83,11 +83,12 @@ ebnv.exp_mix = function(b, s2, g){
     stop("elements of wgrid must be non-negative")
   }
   lambda = sqrt(2/(s2*g$w)) # the K rate parameters of double-exponential, one per gridpoint
-  loglik.matrix = t(log(lambda) - outer(lambda, abs(b), "*")) #n by K matrix
+  loglik.matrix = t(log(0.5) + log(lambda) - outer(lambda, abs(b), "*")) #n by K matrix
   loglik.max = apply(loglik.matrix, 1, max)
   lik.matrix = exp(loglik.matrix-loglik.max)
 
-  mixprop = mixsqp::mixsqp(lik.matrix,control = list(verbose=FALSE))$x
+  res.mixsqp = mixsqp::mixsqp(lik.matrix,control = list(verbose=FALSE))
+  mixprop = res.mixsqp$x
 
   postprob = t(mixprop * t(lik.matrix)) # likelihood * prior
   postprob = postprob/rowSums(postprob) # normalize
@@ -96,6 +97,8 @@ ebnv.exp_mix = function(b, s2, g){
 
   g$mixprop = mixprop
 
-  return(list(g=g, wbar = wbar, loglik = 0))
+  loglik = -length(b) * res.mixsqp$value + sum(loglik.max)
+
+  return(list(g=g, wbar = wbar, loglik = loglik))
 }
 

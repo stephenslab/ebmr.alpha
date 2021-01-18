@@ -4,9 +4,9 @@ ebmr.update.ebnv = function(fit,ebnv_fn){
   bfit = with(fit, sqrt(mu^2 + residual_variance * Sigma_diag)) #
   s2 = with(fit, sb2 * residual_variance)
 
-  ebnv.res = do.call(ebnv_fn,
-                     list(b=bfit, s2=s2,
-                          g = fit$g))
+  ebnv.res = R.utils::doCall(ebnv_fn,
+                     args =list(b=bfit, s2=s2,
+                          g = fit$g),.ignoreUnusedArgs = TRUE)
 
   fit$g = ebnv.res$g
   fit = ebmr.set.wbar(fit,ebnv.res$wbar)
