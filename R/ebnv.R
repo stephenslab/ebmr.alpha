@@ -77,8 +77,9 @@ ebnv.pm = function(b,s2){
 
 #' @describeIn ebnv.np Solve EBNV problem with mixture of exponentials prior
 #' @inheritParams ebnv.np
+#' @param update.mixprop boolean indicating whether to estimate the mixture proportions; if FALSE then mixture proportions are supplied by g$mixprop
 #' @export
-ebnv.exp_mix = function(b, s2, g){
+ebnv.exp_mix = function(b, s2, g, update.mixprop = TRUE){
   if(!all(g$w>0)){
     stop("elements of wgrid must be non-negative")
   }
@@ -87,17 +88,17 @@ ebnv.exp_mix = function(b, s2, g){
   loglik.max = apply(loglik.matrix, 1, max)
   lik.matrix = exp(loglik.matrix-loglik.max)
 
-  res.mixsqp = mixsqp::mixsqp(lik.matrix,control = list(verbose=FALSE))
-  mixprop = res.mixsqp$x
+  if(update.mixprop){
+    res.mixsqp = mixsqp::mixsqp(lik.matrix,control = list(verbose=FALSE))
+    g$mixprop = res.mixsqp$x
+  }
 
-  postprob = t(mixprop * t(lik.matrix)) # likelihood * prior
+  postprob = t(g$mixprop * t(lik.matrix)) # likelihood * prior
   postprob = postprob/rowSums(postprob) # normalize
 
   wbar = rowSums(outer(s2*abs(b)^(-1),lambda, "*") * postprob)^(-1)
 
-  g$mixprop = mixprop
-
-  loglik = -length(b) * res.mixsqp$value + sum(loglik.max)
+  loglik = sum(log(colSums(t(lik.matrix)*g$mixprop)) + loglik.max)
 
   return(list(g=g, wbar = wbar, loglik = loglik))
 }
