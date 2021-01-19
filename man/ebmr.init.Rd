@@ -4,7 +4,7 @@
 \alias{ebmr.init}
 \title{Initialize ebmr fit}
 \usage{
-ebmr.init(X, y, sb2 = 1)
+ebmr.init(X, y, sb2 = 1, residual_variance = sd(y)^2)
 }
 \arguments{
 \item{X}{a numeric n times p matrix}
@@ -12,6 +12,8 @@ ebmr.init(X, y, sb2 = 1)
 \item{y}{an n vector}
 
 \item{sb2}{scalar parameter value}
+
+\item{residual_variance}{residual variance parameter}
 }
 \description{
 Initialize ebmr fit

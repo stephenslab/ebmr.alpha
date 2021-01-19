@@ -9,19 +9,21 @@
 \usage{
 ebnv.np(b, s2, g)
 
-ebnv.exp(b, s2, g = NULL)
+ebnv.exp(b, s2)
 
-ebnv.pm(b, s2, g = NULL)
+ebnv.pm(b, s2)
 
-ebnv.exp_mix(b, s2, g)
+ebnv.exp_mix(b, s2, g, update.mixprop = TRUE)
 }
 \arguments{
 \item{b}{vector of n observations}
 
 \item{s2}{a positive real number}
 
-\item{g}{(used only in some cases) an object with the same structure as the prior to be fit
+\item{g}{(present only in some cases) an object with the same structure as the prior to be fit
 used to specify things like the grid used for discrete priors.}
+
+\item{update.mixprop}{boolean indicating whether to estimate the mixture proportions; if FALSE then mixture proportions are supplied by g$mixprop}
 }
 \value{
 A list with elements

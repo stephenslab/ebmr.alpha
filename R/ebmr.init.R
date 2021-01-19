@@ -18,9 +18,10 @@
 #' @param X a numeric n times p matrix
 #' @param y an n vector
 #' @param sb2 scalar parameter value
+#' @param residual_variance residual variance parameter
 #' @importFrom stats sd
 #' @export
-ebmr.init = function(X,y,sb2=1){
+ebmr.init = function(X,y,sb2=1, residual_variance = sd(y)^2){
   fit = list()
   fit$p = ncol(X)
   fit$n = nrow(X)
@@ -34,7 +35,7 @@ ebmr.init = function(X,y,sb2=1){
   fit$Sigma_full = NULL # for storing the full matrix; for testing only
   fit$Sigma_diag = rep(0,fit$p) # for storing the diagonal of Sigma
 
-  fit$residual_variance = sd(y)^2
+  fit$residual_variance = residual_variance
   fit$wbar = rep(1,fit$p)
   fit$sb2 = sb2
 

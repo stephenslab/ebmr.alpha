@@ -9,7 +9,8 @@ ebmr.update.grr.svd(
   tol = 1e-08,
   maxiter = 1000,
   compute_Sigma_diag = TRUE,
-  compute_Sigma_full = FALSE
+  compute_Sigma_full = FALSE,
+  update_residual_variance = TRUE
 )
 }
 \arguments{
@@ -22,13 +23,15 @@ ebmr.update.grr.svd(
 \item{compute_Sigma_diag}{boolean flag; set to TRUE to compute the diagonal of the posterior variance, otherwise this variance is set to 0.}
 
 \item{compute_Sigma_full}{boolean flag; set to TRUE to compute full Sigma matrix for testing purposes}
+
+\item{update_residual_variance}{boolean flag; set to FALSE to keep residual variance fixed}
 }
 \value{
 an updated ebmr fit
 }
 \description{
 Updates parameters of an EBMR fit by fitting the full GRR model,
-including esitmating hyperparameters (residual variance and prior scaling factor).
+including estimating hyperparameters (residual variance and prior scaling factor).
 The method uses an SVD on Xtilde = XW^0.5, after which
 other computations (EM algorithm to maximize hyperparameters, and posterior computations)
 are cheap.

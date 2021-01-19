@@ -1,7 +1,7 @@
 #' @title Update by fitting GRR model
 #'
 #' @description Updates parameters of an EBMR fit by fitting the full GRR model,
-#' including esitmating hyperparameters (residual variance and prior scaling factor).
+#' including estimating hyperparameters (residual variance and prior scaling factor).
 #' The method uses an SVD on Xtilde = XW^0.5, after which
 #' other computations (EM algorithm to maximize hyperparameters, and posterior computations)
 #' are cheap.
@@ -19,8 +19,10 @@
 #'
 #' @param compute_Sigma_full boolean flag; set to TRUE to compute full Sigma matrix for testing purposes
 #'
+#' @param update_residual_variance boolean flag; set to FALSE to keep residual variance fixed
+#'
 #' @return an updated ebmr fit
-ebmr.update.grr.svd = function(fit, tol = 1e-8, maxiter = 1000, compute_Sigma_diag = TRUE, compute_Sigma_full=FALSE){
+ebmr.update.grr.svd = function(fit, tol = 1e-8, maxiter = 1000, compute_Sigma_diag = TRUE, compute_Sigma_full=FALSE, update_residual_variance=TRUE){
 
   # svd computation
   Xtilde = t(fit$wbar^0.5 * t(fit$X))
@@ -31,7 +33,7 @@ ebmr.update.grr.svd = function(fit, tol = 1e-8, maxiter = 1000, compute_Sigma_di
   df = length(fit$y) - length(ytilde)
   ss = sum(fit$y^2) - sum(ytilde^2)
 
-  yt.em3 = ridge_indep_em3(ytilde, Xtilde.svd$d^2, ss, df, tol, maxiter, s2.init = fit$residual_variance, sb2.init = fit$sb2)
+  yt.em3 = ridge_indep_em3(ytilde, Xtilde.svd$d^2, ss, df, tol, maxiter, s2.init = fit$residual_variance, sb2.init = fit$sb2, update_s2 = update_residual_variance)
 
   fit$residual_variance = yt.em3$s2
   fit$sb2 = yt.em3$sb2
@@ -57,21 +59,43 @@ ebmr.update.grr.svd = function(fit, tol = 1e-8, maxiter = 1000, compute_Sigma_di
 
 
 
-# This code is based on https://stephens999.github.io/misc/ridge_em_svd.html
-# It obtains maximum likelihood estimates for (s2,sb2)
-# in the model y_i | theta_i \sim N(theta_i, s2), theta_i \sim N(0,sb2 s2 d2_i)
-# where y,d2 are given and (s2,sb2) are to be estimated.
-#
-# Except... I modified it to take account of additional residual sum of squares (ss)
-# and degrees of freedom parameter (df), so that we can deal with the
-# case n>p above
-#
-# However, internally it uses a different parameterization to make
-# convergence faster (see the url above).
-# Specifically it fits y_i | theta_i \sim N(sb theta_i,s^2), theta_i \sim N(0,l2 d2_i)
-# so it returns s2hat = s2
-# and sb2hat = sb2 *l2 / s2
-ridge_indep_em3 = function(y, d2, ss = 0, df = 0, tol=1e-3, maxiter=1000, s2.init = 1, sb2.init=1, l2.init=1){
+#' @title Function for estimating hyper-parameters for "independent" ridge regressions (ie the orthogonal case)
+#'
+#' @description
+#' Obtains maximum likelihood estimates for (s2,sb2)
+#' in the model y_i | theta_i \sim N(theta_i, s2), theta_i \sim N(0,sb2 s2 d2_i)
+#' where y,d2 are given and (s2,sb2) are to be estimated. However it uses a different parameterization
+#' to improve convergence (see details). It also incorporates additional sum of squares (ss) and degrees of freedom (df)
+#' which effectively specify a prior on s2 (necessary to deal with fitting ridge regression when n>p above).
+#'
+#' @details This code is based on https://stephens999.github.io/misc/ridge_em_svd.html
+#' extended to take account of additional residual sum of squares (ss)
+#' and degrees of freedom parameter (df), to deal with the case n>p.
+#' To improve convergence (see URL above) it fits the model by using the over-parameterized model:
+#' y_i | theta_i \sim N(sb theta_i,s^2), theta_i \sim N(0,l2 d2_i).
+#' So it returns s2hat = s2 and sb2hat = sb2 *l2 / s2
+#'
+#' @param y numeric vector
+#'
+#' @param d2 numeric vector
+#'
+#' @param ss sum of squares for prior on s2
+#'
+#' @param df degrees of freedom for ss
+#'
+#' @param tol real scalar, specifying convergence tolerance for log-likelihood
+#'
+#' @param maxiter integer, maximum number of iterations
+#'
+#' @param s2.init initial value for s2
+#'
+#' @param sb2.init initial value for sb2
+#'
+#' @param l2.init initial value for l2
+#'
+#' @param update_s2 boolean; if false then s2 is fixed to s2.init
+#'
+ridge_indep_em3 = function(y, d2, ss = 0, df = 0, tol=1e-3, maxiter=1000, s2.init = 1, sb2.init=1, l2.init=1, update_s2 = TRUE){
   k = length(y)
   s2 = s2.init
   sb2 = sb2.init
@@ -93,8 +117,10 @@ ridge_indep_em3 = function(y, d2, ss = 0, df = 0, tol=1e-3, maxiter=1000, s2.ini
     sb2 = (sum(y*post_mean)/sum(post_mean^2 + post_var))^2
     l2 = mean((post_mean^2 + post_var)/d2)
 
-    r = y - sqrt(sb2) * post_mean # residuals
-    s2 = (sum(r^2 + sb2 * post_var ) + ss) / (length(y) + df) # adjusted sum of squares and df
+    if(update_s2){
+      r = y - sqrt(sb2) * post_mean # residuals
+      s2 = (sum(r^2 + sb2 * post_var ) + ss) / (length(y) + df) # adjusted sum of squares and df
+    }
 
     ll = sum(dnorm(y,mean=0,sd = sqrt(sb2*l2*d2 + s2),log=TRUE))
     ll = ll - (df/2)*log(2*pi*s2) - ss/(2*s2)
@@ -105,7 +131,7 @@ ridge_indep_em3 = function(y, d2, ss = 0, df = 0, tol=1e-3, maxiter=1000, s2.ini
   return(list(s2=s2,sb2=sb2*l2/s2,loglik=loglik))
 }
 
-
+# original code from URL above, used for testing
 ridge_em3 = function(y,X, s2, sb2, l2, niter=10){
   XtX = t(X) %*% X
   Xty = t(X) %*% y

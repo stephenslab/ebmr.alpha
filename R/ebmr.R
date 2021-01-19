@@ -51,11 +51,11 @@ ebmr = function (X, y, tol = 1e-8, maxiter = 1000, ebnv_fn = ebnv.exp, compute_m
 #' @describeIn ebmr Updates a previous EBMR fit, usually using a new prior family
 #' @param fit The previous EBMR fit
 #' @export
-ebmr.update = function (fit, tol = 1e-8, maxiter = 1000, ebnv_fn = ebnv.exp, compute_mode = FALSE){
+ebmr.update = function (fit, tol = 1e-8, maxiter = 1000, ebnv_fn = ebnv.exp, compute_mode = FALSE, update_residual_variance = TRUE){
 
   for(i in 1:maxiter){
 
-    fit = ebmr.update.grr.svd(fit, compute_Sigma_diag = !compute_mode)
+    fit = ebmr.update.grr.svd(fit, compute_Sigma_diag = !compute_mode, update_residual_variance = update_residual_variance)
     #fit = ebmr.scale.sb2(fit)
 
     fit = ebmr.update.ebnv(fit,ebnv_fn)

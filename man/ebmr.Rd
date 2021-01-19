@@ -19,7 +19,8 @@ ebmr.update(
   tol = 1e-08,
   maxiter = 1000,
   ebnv_fn = ebnv.exp,
-  compute_mode = FALSE
+  compute_mode = FALSE,
+  update_residual_variance = TRUE
 )
 }
 \arguments{
