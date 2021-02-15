@@ -13,7 +13,13 @@ ebnv.exp(b, s2)
 
 ebnv.pm(b, s2)
 
-ebnv.exp_mix(b, s2, g, update.mixprop = TRUE)
+ebnv.exp_mix(
+  b,
+  s2,
+  g,
+  update.mixprop = c("mixsqp", "em", "none"),
+  update.w = c("em", "none")
+)
 }
 \arguments{
 \item{b}{vector of n observations}
@@ -23,7 +29,9 @@ ebnv.exp_mix(b, s2, g, update.mixprop = TRUE)
 \item{g}{(present only in some cases) an object with the same structure as the prior to be fit
 used to specify things like the grid used for discrete priors.}
 
-\item{update.mixprop}{boolean indicating whether to estimate the mixture proportions; if FALSE then mixture proportions are supplied by g$mixprop}
+\item{update.mixprop}{string indicating how to estimate/update the mixture proportions; if "none" then mixture proportions are supplied by g$mixprop}
+
+\item{update.w}{string indicating how to update w parameters; ; if "none" then mixture proportions are supplied by g$w}
 }
 \value{
 A list with elements

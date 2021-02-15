@@ -42,3 +42,21 @@ test_that("ebnv.exp and ebnv.mix_exp logliks match when the mix solution is triv
   res.exp_mix = ebnv.exp_mix(b,s2,list(w=w))
   expect_equal(res.exp_mix$loglik,res.exp$loglik, tol=1e-2)
 })
+
+
+test_that("ebnv.mix_exp em updates are increasing log-likelihood",{
+  set.seed(1)
+  n = 1000
+  w = c(rexp(n,rate = 1),rexp(n,rate=10))
+  b = rnorm(2*n,0,sd=sqrt(w))
+
+  g = list(mixprop=c(0.5,0.5), w=c(2,3))
+  niter = 100
+  loglik = rep(0,niter)
+  for(i in 1:niter){
+    res = ebnv.exp_mix(b,1,g,update.mixprop = "em",update.w="em")
+    loglik[i] = res$loglik
+    g = res$g
+  }
+  expect_true(all(diff(loglik)>=0))
+})

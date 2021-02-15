@@ -76,27 +76,43 @@ ebnv.pm = function(b,s2){
 }
 
 #' @describeIn ebnv.np Solve EBNV problem with mixture of exponentials prior
-#' @inheritParams ebnv.np
-#' @param update.mixprop boolean indicating whether to estimate the mixture proportions; if FALSE then mixture proportions are supplied by g$mixprop
+#' @param update.mixprop string indicating how to estimate/update the mixture proportions; if "none" then mixture proportions are supplied by g$mixprop
+#' @param update.w string indicating how to update w parameters; ; if "none" then mixture proportions are supplied by g$w
 #' @export
-ebnv.exp_mix = function(b, s2, g, update.mixprop = TRUE){
+ebnv.exp_mix = function(b, s2, g, update.mixprop = c("mixsqp","em","none"), update.w = c("em","none")){
   if(!all(g$w>0)){
     stop("elements of wgrid must be non-negative")
   }
-  lambda = sqrt(2/(s2*g$w)) # the K rate parameters of double-exponential, one per gridpoint
+  update.mixprop = match.arg(update.mixprop)
+  update.w = match.arg(update.w)
+
+  # first update the mixture proportions
+  lambda = sqrt(2/(s2*g$w)) # the K rate parameters of implied double-exponential prior on b, one per gridpoint
   loglik.matrix = t(log(0.5) + log(lambda) - outer(lambda, abs(b), "*")) #n by K matrix
   loglik.max = apply(loglik.matrix, 1, max)
   lik.matrix = exp(loglik.matrix-loglik.max)
 
-  if(update.mixprop){
+  if(update.mixprop=="mixsqp"){
     res.mixsqp = mixsqp::mixsqp(lik.matrix,control = list(verbose=FALSE))
     g$mixprop = res.mixsqp$x
+  } else if(update.mixprop=="em"){
+    postprob = t(g$mixprop * t(lik.matrix)) # likelihood * prior
+    postprob = postprob/rowSums(postprob) # normalize
+    g$mixprop = colMeans(postprob)
   }
 
   postprob = t(g$mixprop * t(lik.matrix)) # likelihood * prior
   postprob = postprob/rowSums(postprob) # normalize
 
+  if(update.w == "em"){
+    bbar = colSums(postprob*abs(b))/colSums(postprob) #weighted mean of abs(b)
+    g$w = (2/s2) * bbar^2
+    lambda = sqrt(2/(s2*g$w)) #equal to bbar, the K rate parameters of implied double-exponential prior on b, one per gridpoint
+  }
+
   wbar = rowSums(outer(s2*abs(b)^(-1),lambda, "*") * postprob)^(-1)
+
+
 
   loglik = sum(log(colSums(t(lik.matrix)*g$mixprop)) + loglik.max)
 
