@@ -16,8 +16,8 @@
 #'
 #' @param s2 a positive real number
 #'
-#' @param g (present only in some cases) an object with the same structure as the prior to be fit
-#' used to specify things like the grid used for discrete priors.
+#' @param g.init (present only in some cases) an object with the same structure as the prior to be fit
+#' used to initialize the algorithm (and so, implicitly, to sometimes specify parameters like the grid to be used)
 #'
 #' @return A list with elements
 #'
@@ -30,7 +30,8 @@
 #'
 #' @describeIn ebnv.np Solve EBNV problem with non-parametric prior
 #' @export
-ebnv.np = function(b, s2, g){
+ebnv.np = function(b, s2, g.init){
+  g = g.init
   if(!all(g$w>0)){
     stop("elements of wgrid must be non-negative")
   }
@@ -79,7 +80,8 @@ ebnv.pm = function(b,s2){
 #' @param update.mixprop string indicating how to estimate/update the mixture proportions; if "none" then mixture proportions are supplied by g$mixprop
 #' @param update.w string indicating how to update w parameters; ; if "none" then mixture proportions are supplied by g$w
 #' @export
-ebnv.exp_mix = function(b, s2, g, update.mixprop = c("mixsqp","em","none"), update.w = c("em","none")){
+ebnv.exp_mix = function(b, s2, g.init, update.mixprop = c("em","mixsqp","none"), update.w = c("em","none")){
+  g=g.init
   if(!all(g$w>0)){
     stop("elements of wgrid must be non-negative")
   }

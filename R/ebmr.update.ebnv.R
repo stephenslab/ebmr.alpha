@@ -6,7 +6,7 @@ ebmr.update.ebnv = function(fit,ebnv_fn){
 
   ebnv.res = R.utils::doCall(ebnv_fn,
                      args =list(b=bfit, s2=s2,
-                          g = fit$g),.ignoreUnusedArgs = TRUE)
+                          g.init = fit$g),.ignoreUnusedArgs = TRUE)
 
   fit$g = ebnv.res$g
   fit = ebmr.set.wbar(fit,ebnv.res$wbar)

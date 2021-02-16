@@ -7,7 +7,7 @@
 \alias{ebnv.exp_mix}
 \title{Solve EBNV problem}
 \usage{
-ebnv.np(b, s2, g)
+ebnv.np(b, s2, g.init)
 
 ebnv.exp(b, s2)
 
@@ -16,8 +16,8 @@ ebnv.pm(b, s2)
 ebnv.exp_mix(
   b,
   s2,
-  g,
-  update.mixprop = c("mixsqp", "em", "none"),
+  g.init,
+  update.mixprop = c("em", "mixsqp", "none"),
   update.w = c("em", "none")
 )
 }
@@ -26,8 +26,8 @@ ebnv.exp_mix(
 
 \item{s2}{a positive real number}
 
-\item{g}{(present only in some cases) an object with the same structure as the prior to be fit
-used to specify things like the grid used for discrete priors.}
+\item{g.init}{(present only in some cases) an object with the same structure as the prior to be fit
+used to initialize the algorithm (and so, implicitly, to sometimes specify parameters like the grid to be used)}
 
 \item{update.mixprop}{string indicating how to estimate/update the mixture proportions; if "none" then mixture proportions are supplied by g$mixprop}
 

@@ -10,7 +10,7 @@ test_that("ebnv results make sense",{
   expect_equal(temp$g$w,1/eta,tol=1e-2)
   expect_equal(as.numeric(lm(w ~ temp$wbar)$coef[2]),1,tol=1e-2)
 
-  temp=ebnv.np(b,s2,g=list(w=seq(1e-5,2,length=20)))
+  temp=ebnv.np(b,s2,g.init=list(w=seq(1e-5,2,length=20)))
 
   expect_equal(sum(temp$g$mixprop * temp$g$w),1/eta,tol=1e-2)
   expect_equal(as.numeric(lm(w ~ temp$wbar)$coef[2]),1,tol=1e-1)
@@ -26,7 +26,7 @@ test_that("ebnv results make sense",{
   expect_equal(temp$g$w,1/eta,tol=1e-2)
   expect_equal(as.numeric(lm(w ~ temp$wbar)$coef[2]),1,tol=1e-2)
 
-  temp=ebnv.np(b,s2,g=list(w=seq(1e-5,2,length=20)))
+  temp=ebnv.np(b,s2,g.init=list(w=seq(1e-5,2,length=20)))
 
   expect_equal(sum(temp$g$mixprop * temp$g$w),1/eta,tol=1e-2)
   expect_equal(as.numeric(lm(w ~ temp$wbar)$coef[2]),1,tol=1e-1)
@@ -39,7 +39,7 @@ test_that("ebnv.exp and ebnv.mix_exp logliks match when the mix solution is triv
   s2= 1
   res.exp = ebnv.exp(b,s2)
   w = c(0.01,res.exp$g$w, 1000) # set up grid so that only the middle one will be plausible
-  res.exp_mix = ebnv.exp_mix(b,s2,list(w=w))
+  res.exp_mix = ebnv.exp_mix(b,s2,g.init=list(w=w), update.mixprop= "mixsqp", update.w = "none")
   expect_equal(res.exp_mix$loglik,res.exp$loglik, tol=1e-2)
 })
 
