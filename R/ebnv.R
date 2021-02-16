@@ -28,31 +28,19 @@
 #' \item{loglik}{The log-likelihood p(b | s2, ghat)}
 #'
 #'
-#' @describeIn ebnv.np Solve EBNV problem with non-parametric prior
+#' @describeIn ebnv.pm Solve EBNV problem with point mass prior
 #' @export
-ebnv.np = function(b, s2, g.init){
-  g = g.init
-  if(!all(g$w>0)){
-    stop("elements of wgrid must be non-negative")
-  }
-  std_obs = t(outer(b,sqrt(s2*g$w),"/")) # standardized observations
-  loglik.matrix = t(log(1/sqrt(s2*g$w)) + dnorm(std_obs,log=TRUE))
-  loglik.max = apply(loglik.matrix, 1, max)
-  lik.matrix = exp(loglik.matrix-loglik.max)
-
-  mixprop = mixsqp::mixsqp(lik.matrix,control = list(verbose=FALSE))$x
-
-  postprob = t(mixprop * t(lik.matrix)) # likelihood * prior
-  postprob = postprob/rowSums(postprob) # normalize
-
-  wbar = 1/colSums((1/g$w) * t(postprob))
-  g$mixprop = mixprop
-
-  return(list(g=g, wbar = wbar, loglik=0))
+ebnv.pm = function(b,s2){
+  w = mean(b^2)/s2
+  wbar =  rep(w,length(b))
+  g = list(mixprop = c(1), w = w)
+  loglik = sum(dnorm(b,0,sqrt(s2*w), log=TRUE))
+  return(list(g=g,wbar=wbar, loglik=loglik))
 }
 
-#' @describeIn ebnv.np Solve EBNV problem with exponential prior
-#' @inheritParams ebnv.np
+
+#' @describeIn ebnv.pm Solve EBNV problem with exponential prior
+#' @inheritParams ebnv.pm
 #' @export
 ebnv.exp = function(b,s2){
   w = 2*mean(abs(b))^2/s2
@@ -65,30 +53,71 @@ ebnv.exp = function(b,s2){
   return(list(g=g,wbar=wbar, loglik = loglik))
 }
 
-#' @describeIn ebnv.np Solve EBNV problem with point mass prior
-#' @inheritParams ebnv.np
-#' @export
-ebnv.pm = function(b,s2){
-  w = mean(b^2)/s2
-  wbar =  rep(w,length(b))
-  g = list(mixprop = c(1), w = w)
-  loglik = sum(dnorm(b,0,sqrt(s2*w), log=TRUE))
-  return(list(g=g,wbar=wbar, loglik=loglik))
+compute_postprob = function(mixprop,lik.matrix){
+  postprob = t(mixprop * t(lik.matrix)) # likelihood * prior
+  postprob = postprob/rowSums(postprob) # normalize
+  return(postprob)
 }
 
-#' @describeIn ebnv.np Solve EBNV problem with mixture of exponentials prior
+#' @describeIn ebnv.pm Solve EBNV problem with non-parametric prior
+#' @inheritParams ebnv.pm
+#' @export
+ebnv.np = function(b, s2, g.init, update.mixprop = c("em","mixsqp","none"), update.w = c("em","none")){
+  g = g.init
+  if(!all(g$w>0)){
+    stop("elements of w grid must be positive")
+  }
+  update.mixprop = match.arg(update.mixprop)
+  update.w = match.arg(update.w)
+
+
+  std_obs = t(outer(b,sqrt(s2*g$w),"/")) # standardized observations
+  loglik.matrix = t(log(1/sqrt(s2*g$w)) + dnorm(std_obs,log=TRUE))
+  loglik.max = apply(loglik.matrix, 1, max)
+  lik.matrix = exp(loglik.matrix-loglik.max)
+
+  if(update.mixprop=="mixsqp"){
+    res.mixsqp = mixsqp::mixsqp(lik.matrix,control = list(verbose=FALSE))
+    g$mixprop = res.mixsqp$x
+  } else if(update.mixprop=="em"){
+    postprob = compute_postprob(g$mixprop,lik.matrix) # likelihood * prior
+    g$mixprop = colMeans(postprob)
+  }
+
+  if(update.w == "em"){
+    postprob = compute_postprob(g$mixprop,lik.matrix) # likelihood * prior
+
+    b2bar = colSums(postprob*(b^2))/colSums(postprob) #weighted mean of abs(b)
+    g$w = b2bar/s2
+
+    std_obs = t(outer(b,sqrt(s2*g$w),"/")) # standardized observations
+    loglik.matrix = t(log(1/sqrt(s2*g$w)) + dnorm(std_obs,log=TRUE))
+    loglik.max = apply(loglik.matrix, 1, max)
+    lik.matrix = exp(loglik.matrix-loglik.max)
+  }
+
+  postprob = compute_postprob(g$mixprop,lik.matrix) # likelihood * prior
+
+  wbar = 1/colSums((1/g$w) * t(postprob))
+  loglik = sum(log(colSums(t(lik.matrix)*g$mixprop)) + loglik.max)
+
+  return(list(g=g, wbar = wbar, loglik=loglik))
+}
+
+
+#' @describeIn ebnv.pm Solve EBNV problem with mixture of exponentials prior
 #' @param update.mixprop string indicating how to estimate/update the mixture proportions; if "none" then mixture proportions are supplied by g$mixprop
 #' @param update.w string indicating how to update w parameters; ; if "none" then mixture proportions are supplied by g$w
 #' @export
 ebnv.exp_mix = function(b, s2, g.init, update.mixprop = c("em","mixsqp","none"), update.w = c("em","none")){
   g=g.init
   if(!all(g$w>0)){
-    stop("elements of wgrid must be non-negative")
+    stop("elements of w grid must be positive")
   }
   update.mixprop = match.arg(update.mixprop)
   update.w = match.arg(update.w)
 
-  # first update the mixture proportions
+  # first compute the likelihood matrix and posterior probabilities
   lambda = sqrt(2/(s2*g$w)) # the K rate parameters of implied double-exponential prior on b, one per gridpoint
   loglik.matrix = t(log(0.5) + log(lambda) - outer(lambda, abs(b), "*")) #n by K matrix
   loglik.max = apply(loglik.matrix, 1, max)
@@ -98,24 +127,25 @@ ebnv.exp_mix = function(b, s2, g.init, update.mixprop = c("em","mixsqp","none"),
     res.mixsqp = mixsqp::mixsqp(lik.matrix,control = list(verbose=FALSE))
     g$mixprop = res.mixsqp$x
   } else if(update.mixprop=="em"){
-    postprob = t(g$mixprop * t(lik.matrix)) # likelihood * prior
-    postprob = postprob/rowSums(postprob) # normalize
+    postprob = compute_postprob(g$mixprop,lik.matrix) # likelihood * prior
     g$mixprop = colMeans(postprob)
   }
 
-  postprob = t(g$mixprop * t(lik.matrix)) # likelihood * prior
-  postprob = postprob/rowSums(postprob) # normalize
-
   if(update.w == "em"){
+    postprob = compute_postprob(g$mixprop,lik.matrix) # likelihood * prior
+
     bbar = colSums(postprob*abs(b))/colSums(postprob) #weighted mean of abs(b)
     g$w = (2/s2) * bbar^2
-    lambda = sqrt(2/(s2*g$w)) #equal to bbar, the K rate parameters of implied double-exponential prior on b, one per gridpoint
+
+    lambda = sqrt(2/(s2*g$w)) # equal to bbar, the K rate parameters of implied double-exponential prior on b, one per gridpoint
+    loglik.matrix = t(log(0.5) + log(lambda) - outer(lambda, abs(b), "*")) #n by K matrix
+    loglik.max = apply(loglik.matrix, 1, max)
+    lik.matrix = exp(loglik.matrix-loglik.max)
   }
 
+  postprob = compute_postprob(g$mixprop,lik.matrix) # likelihood * prior
+
   wbar = rowSums(outer(s2*abs(b)^(-1),lambda, "*") * postprob)^(-1)
-
-
-
   loglik = sum(log(colSums(t(lik.matrix)*g$mixprop)) + loglik.max)
 
   return(list(g=g, wbar = wbar, loglik = loglik))
