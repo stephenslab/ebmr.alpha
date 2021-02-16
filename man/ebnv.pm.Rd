@@ -15,8 +15,8 @@ ebnv.np(
   b,
   s2,
   g.init,
-  update.mixprop = c("mixsqp", "em", "none"),
-  update.w = c("none", "em")
+  update.mixprop = c("em", "mixsqp", "none"),
+  update.w = c("em", "none")
 )
 
 ebnv.exp_mix(

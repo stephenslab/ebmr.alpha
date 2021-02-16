@@ -61,6 +61,13 @@ ebmr.update = function (fit, tol = 1e-8, maxiter = 1000, ebnv_fn = ebnv.exp, com
     fit = ebmr.update.ebnv(fit,ebnv_fn)
 
     fit = ebmr.update.elbo(fit)
+
+    if(is.nan(ebmr_get_elbodiff(fit))){
+      warning("elbo diff is nan")
+      break
+    }
+    #print(ebmr_get_elbodiff(fit))
+
     if(abs(ebmr_get_elbodiff(fit)) < tol) # use absolute until the elbo computation is correct
       break
   }
