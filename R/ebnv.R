@@ -104,6 +104,20 @@ ebnv.np = function(b, s2, g.init, update.mixprop = c("em","mixsqp","none"), upda
   return(list(g=g, wbar = wbar, loglik=loglik))
 }
 
+#' @describeIn ebnv.pm Solve EBNV problem with non-parametric prior with EM update of both grid and mixture proportions
+#' @inheritParams ebnv.pm
+#' @export
+ebnv.np.em = function(b, s2, g.init){
+  ebnv.np(b, s2, g.init, "em", "em")
+}
+
+#' @describeIn ebnv.pm Solve EBNV problem with non-parametric prior with fixed grid
+#' @inheritParams ebnv.pm
+#' @export
+ebnv.np.fixgrid = function(b, s2, g.init){
+  ebnv.np(b, s2, g.init, "mixsqp", "none")
+}
+
 
 #' @describeIn ebnv.pm Solve EBNV problem with mixture of exponentials prior
 #' @param update.mixprop string indicating how to estimate/update the mixture proportions; if "none" then mixture proportions are supplied by g$mixprop
@@ -151,3 +165,16 @@ ebnv.exp_mix = function(b, s2, g.init, update.mixprop = c("em","mixsqp","none"),
   return(list(g=g, wbar = wbar, loglik = loglik))
 }
 
+#' @describeIn ebnv.pm Solve EBNV problem with mixture of exponentials prior with  EM update of both grid and mixture proportions
+#' @inheritParams ebnv.pm
+#' @export
+ebnv.exp_mix.em = function(b, s2, g.init){
+  ebnv.exp_mix(b, s2, g.init, "em", "em")
+}
+
+#' @describeIn ebnv.pm Solve EBNV problem with mixture of exponentials prior with fixed grid
+#' @inheritParams ebnv.pm
+#' @export
+ebnv.exp_mix.fixgrid = function(b, s2, g.init){
+  ebnv.exp_mix(b, s2, g.init, "mixsqp", "none")
+}

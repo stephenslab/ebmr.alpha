@@ -4,7 +4,11 @@
 \alias{ebnv.pm}
 \alias{ebnv.exp}
 \alias{ebnv.np}
+\alias{ebnv.np.em}
+\alias{ebnv.np.fixgrid}
 \alias{ebnv.exp_mix}
+\alias{ebnv.exp_mix.em}
+\alias{ebnv.exp_mix.fixgrid}
 \title{Solve EBNV problem}
 \usage{
 ebnv.pm(b, s2)
@@ -19,6 +23,10 @@ ebnv.np(
   update.w = c("em", "none")
 )
 
+ebnv.np.em(b, s2, g.init)
+
+ebnv.np.fixgrid(b, s2, g.init)
+
 ebnv.exp_mix(
   b,
   s2,
@@ -26,6 +34,10 @@ ebnv.exp_mix(
   update.mixprop = c("em", "mixsqp", "none"),
   update.w = c("em", "none")
 )
+
+ebnv.exp_mix.em(b, s2, g.init)
+
+ebnv.exp_mix.fixgrid(b, s2, g.init)
 }
 \arguments{
 \item{b}{vector of n observations}
@@ -70,6 +82,14 @@ Bayes. They estimate the prior g, and (the inverse of the) posterior mean for ea
 
 \item \code{ebnv.np}: Solve EBNV problem with non-parametric prior
 
+\item \code{ebnv.np.em}: Solve EBNV problem with non-parametric prior with EM update of both grid and mixture proportions
+
+\item \code{ebnv.np.fixgrid}: Solve EBNV problem with non-parametric prior with fixed grid
+
 \item \code{ebnv.exp_mix}: Solve EBNV problem with mixture of exponentials prior
+
+\item \code{ebnv.exp_mix.em}: Solve EBNV problem with mixture of exponentials prior with  EM update of both grid and mixture proportions
+
+\item \code{ebnv.exp_mix.fixgrid}: Solve EBNV problem with mixture of exponentials prior with fixed grid
 }}
 
