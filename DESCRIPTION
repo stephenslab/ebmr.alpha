@@ -1,8 +1,8 @@
 Encoding: UTF-8
 Type: Package
 Package: ebmr.alpha
-Version: 0.2.7
-Date: 2020-10-29
+Version: 0.2.8
+Date: 2021-03-15
 Title: Empirical Bayes Multiple Regression
 Authors@R: c(person("Matthew","Stephens",role=c("aut","cre"),
                     email="mstephens@uchicago.edu"),

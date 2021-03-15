@@ -63,7 +63,7 @@ ebmr.update.grr.svd = function(fit, tol = 1e-8, maxiter = 1000, compute_Sigma_di
 #'
 #' @description
 #' Obtains maximum likelihood estimates for (s2,sb2)
-#' in the model y_i | theta_i \sim N(theta_i, s2), theta_i \sim N(0,sb2 s2 d2_i)
+#' in the model \deqn{y_i | theta_i \sim N(theta_i, s2), theta_i \sim N(0,sb2 s2 d2_i),} 
 #' where y,d2 are given and (s2,sb2) are to be estimated. However it uses a different parameterization
 #' to improve convergence (see details). It also incorporates additional sum of squares (ss) and degrees of freedom (df)
 #' which effectively specify a prior on s2 (necessary to deal with fitting ridge regression when n>p above).
@@ -72,7 +72,7 @@ ebmr.update.grr.svd = function(fit, tol = 1e-8, maxiter = 1000, compute_Sigma_di
 #' extended to take account of additional residual sum of squares (ss)
 #' and degrees of freedom parameter (df), to deal with the case n>p.
 #' To improve convergence (see URL above) it fits the model by using the over-parameterized model:
-#' y_i | theta_i \sim N(sb theta_i,s^2), theta_i \sim N(0,l2 d2_i).
+#' \deqn{y_i | theta_i \sim N(sb theta_i,s^2), theta_i \sim N(0,l2 d2_i).}
 #' So it returns s2hat = s2 and sb2hat = sb2 *l2 / s2
 #'
 #' @param y numeric vector
